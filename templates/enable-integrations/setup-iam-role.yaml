@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Setup IAM role for QRadar
+Parameters:
+  PrincipalArn:
+    Type: String
+    Description: ARN of the principal that can assume the role
+    Default: ''
+
+  CloudTrailSQSArn:
+    Type: String
+    Description: ARN of SQS queue for the CloudTrail events.
+
+  GuardDutySQSArn:
+    Type: String
+    Description: ARN of SQS Queue for the GuardDuty Findings.
+
+  CloudTrailBucket:
+    Type: String
+    Description: ARN of the CloudTrail logs bucket
+
+  GuardDutyFindingsBucket:
+    Type: String
+    Description: ARN of the GuardDuty Findings Bucket
+
+Conditions:
+  HasPrincipalArn: !Not [!Equals [!Ref PrincipalArn, '']]
+
+Resources:
+  QRadarRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: QRadarRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !If
+                - HasPrincipalArn
+                - !Sub '${PrincipalArn}'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Policy1
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                  - sqs:DeleteMessage
+                  - s3:GetObject
+                  - sqs:ReceiveMessage
+                  - sqs:GetQueueAttributes
+                Resource:
+                  - !Ref CloudTrailSQSArn
+                  - !Ref GuardDutySQSArn
+                  - !Ref CloudTrailBucket
+                  - !Ref GuardDutyFindingsBucket

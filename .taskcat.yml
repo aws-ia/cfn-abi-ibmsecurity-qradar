@@ -1,33 +1,26 @@
 project:
-  name: update-me-to-project-repo-name
-  owner: quickstart@amazon.com
+  name: cfn-abi-ibmsecurity-qradar
+  owner: durgadas@ibm.com
   package_lambda: false
+  shorten_stack_name: true
+  s3_regional_buckets: false
   regions:
-  - ap-northeast-1
-  - ap-northeast-2
-  - ap-southeast-1
-  - ap-southeast-2
-  - eu-central-1
-  - eu-west-1
-  - sa-east-1
-  - us-east-1
-  - us-west-1
-  - us-west-2
-tests:
-  sample:
-    parameters:
-      Param1: 'Inputs to Stack'
-      # Examples: of other taskcat dynamic input parameters for more into see http://taskcat.io
-      #
-      #      AvailabilityZones: $[taskcat_genaz_3]
-      #      ByteValue: 1
-      #      PasswordA: $[taskcat_genpass_8A]
-      #      PasswordB: $[taskcat_genpass_32S]
-      #      RandomNumber: $[taskcat_random-numbers]
-      #      RandomString: $[taskcat_random-string]
-      #      StackName: TestStack
-      #      UUID: $[taskcat_genuuid]
-      #
-    regions:
     - us-east-1
-    template: templates/sample-workload.template.yaml
+
+tests:
+  launch-qradar-main:
+    parameters:
+      pSRASourceS3BucketName: $[taskcat_autobucket]
+      pSRAS3BucketRegion: $[taskcat_current_region]
+      pSRAStagingS3KeyPrefix: $[taskcat_project_name]
+    regions:
+      - us-east-1
+    template: templates/abi-enable-qradar-integration.yaml
+  launch-sqs:
+    parameters:
+      pBucketName: test-sqs-integration-bucket
+      pBucketArn: arn:aws:s3:::test-sqs-integration-bucket
+      pQueueName: test-sqs-queue
+    regions:
+      - us-east-1
+    template: templates/enable-integrations/enable-sqs-s3-integrations.yaml

@@ -1,0 +1,286 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: SQS and S3 Integration for QRadar
+Parameters:
+  pBucketName:
+    Type: String
+  pBucketArn:
+    Type: String
+  pQueueName:
+    Type: String
+  pLambdaFunctionName:
+    AllowedPattern: '^[\w-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [_, -]
+    Default: sra-qradar-s3-listener
+    Description: Lambda function name for updating event listener
+    Type: String
+  pLambdaRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -].
+    Default: sra-qradar-s3-listener-lambda
+    Description: Lambda execution role for updating event listener
+    Type: String
+
+Conditions:
+  cUseGraviton: !Or
+    - !Equals [!Ref 'AWS::Region', ap-northeast-1]
+    - !Equals [!Ref 'AWS::Region', ap-south-1]
+    - !Equals [!Ref 'AWS::Region', ap-southeast-1]
+    - !Equals [!Ref 'AWS::Region', ap-southeast-2]
+    - !Equals [!Ref 'AWS::Region', eu-central-1]
+    - !Equals [!Ref 'AWS::Region', eu-west-1]
+    - !Equals [!Ref 'AWS::Region', eu-west-2]
+    - !Equals [!Ref 'AWS::Region', us-east-1]
+    - !Equals [!Ref 'AWS::Region', us-east-2]
+    - !Equals [!Ref 'AWS::Region', us-west-2]
+
+Resources:
+  rKMSKey:
+    Type: 'AWS::KMS::Key'
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: F76
+            reason: Need wildcard else PutBucketNotificationConfiguration operation fails with invalid destination.
+      checkov:
+        skip:
+          - id: CKV_AWS_33
+            comment: Need wildcard else PutBucketNotificationConfiguration operation fails with invalid destination.
+    Properties:
+      Description: !Sub 'KMS Key for the ${pQueueName}'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: 'key-default'
+        Statement:
+          - Sid: 'Enable IAM User Permissions'
+            Effect: 'Allow'
+            Principal:
+              AWS: '*'
+            Action:
+              - 'kms:*'
+            Resource: '*'
+          - Sid: 'Allow use of the key for encryption'
+            Effect: 'Allow'
+            Principal:
+              AWS: '*'
+            Action:
+              - 'kms:Encrypt'
+            Resource: '*'
+
+  rSQSQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      QueueName: !Ref pQueueName
+      KmsMasterKeyId: !Ref rKMSKey
+
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 's3.amazonaws.com'
+            Action:
+              - SQS:SendMessage
+            Resource: !GetAtt rSQSQueue.Arn
+            Condition:
+              ArnLike:
+                aws:SourceArn: !Ref pBucketArn
+      Queues:
+        - !Ref rSQSQueue
+
+  rS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref pBucketName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowLambdaPutBucketNotification
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt rS3NotificationListenerLambdaRole.Arn
+            Action: s3:PutBucketNotification
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref pBucketName
+
+  rS3NotificationListenerLambdaCustomResource:
+    Type: Custom::LambdaCustomResource
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt rS3NotificationListenerLambdaFunction.Arn
+      BucketName: !Ref pBucketName
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:*
+            Queue: !GetAtt rSQSQueue.Arn
+          - Event: s3:ObjectRemoved:*
+            Queue: !GetAtt rSQSQueue.Arn
+
+  rS3NotificationListenerLambdaFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+          - id: CKV_AWS_173
+            comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      FunctionName: !Ref pLambdaFunctionName
+      Description: Update Notification Listener for the S3 buckets
+      Architectures: !If
+        - cUseGraviton
+        - [arm64]
+        - !Ref AWS::NoValue
+      Handler: index.lambda_handler
+      Role: !GetAtt rS3NotificationListenerLambdaRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import logging
+
+          # Configure the logger
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def lambda_handler(event, context):
+              logger.info('Lambda function execution started')
+              logger.info('Received event: %s', event)
+              bucket_name = event['ResourceProperties']['BucketName']
+              notification_configuration = event['ResourceProperties']['NotificationConfiguration']
+
+              logger.info('Received bucket name: %s', bucket_name)
+              logger.info('Received notification configuration: %s', notification_configuration)
+
+              try:
+                  updated_notification_configuration = {
+                      'QueueConfigurations': [
+                          {
+                              'QueueArn': notification_configuration['QueueConfigurations'][0]['Queue'],
+                              'Events': [notification_configuration['QueueConfigurations'][0]['Event']]
+                          },
+                          {
+                              'QueueArn': notification_configuration['QueueConfigurations'][1]['Queue'],
+                              'Events': [notification_configuration['QueueConfigurations'][1]['Event']]
+                          }
+                      ]
+                  }
+                  s3 = boto3.client('s3')
+
+                  if event['RequestType'] == 'Delete':
+                      logger.info('Request type is delete')
+                      updated_notification_configuration = {}
+           
+                  response = s3.put_bucket_notification_configuration(
+                      Bucket=bucket_name,
+                      NotificationConfiguration=updated_notification_configuration
+                  )
+
+                  logger.info('Bucket notification configuration updated: %s', response)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  logger.error('Failed to update bucket notification configuration: %s', str(e))
+                  if event['RequestType'] == 'Delete':
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  else:
+                      cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+
+  rS3NotificationListenerLambdaLogGroup:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W84
+            reason: CloudWatch logs are for lambda used for Cloud formation only.
+          - id: W28
+            reason: These resources need to be retained and is immutable.
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            comment: Ensure that CloudWatch Log Group is encrypted by KMS
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${pLambdaFunctionName}
+      RetentionInDays: 1
+
+  rS3NotificationListenerLambdaRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W28
+            reason: These resources need to be retained and is immutable.
+    Properties:
+      RoleName: !Ref pLambdaRoleName
+      Description: !Sub Role for '${pLambdaRoleName}' Lambda function
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: S3BucketNotificationFunctionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:PutBucketNotification
+                Resource: !Ref pBucketArn
+        - PolicyName: CloudWatchLogGroup
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${pLambdaFunctionName}:log-stream:*
+
+Outputs:
+  QueueURL:
+    Description: 'URL of the SQS Queue'
+    Value: !Ref rSQSQueue
+  QueueARN:
+    Description: 'ARN of the AmazonSQS Queue'
+    Value: !GetAtt rSQSQueue.Arn
+  QueueName:
+    Description: 'Name of the Amazon SQS Queue'
+    Value: !GetAtt rSQSQueue.QueueName
