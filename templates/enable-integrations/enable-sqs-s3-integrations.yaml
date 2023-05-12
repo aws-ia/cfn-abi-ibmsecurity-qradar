@@ -124,8 +124,6 @@ Resources:
         QueueConfigurations:
           - Event: s3:ObjectCreated:*
             Queue: !GetAtt rSQSQueue.Arn
-          - Event: s3:ObjectRemoved:*
-            Queue: !GetAtt rSQSQueue.Arn
 
   rS3NotificationListenerLambdaFunction:
     Metadata:
