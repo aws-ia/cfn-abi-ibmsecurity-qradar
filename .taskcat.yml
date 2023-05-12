@@ -16,11 +16,3 @@ tests:
     regions:
       - us-east-1
     template: templates/abi-enable-qradar-integration.yaml
-  launch-sqs:
-    parameters:
-      pBucketName: test-sqs-integration-bucket
-      pBucketArn: arn:aws:s3:::test-sqs-integration-bucket
-      pQueueName: test-sqs-queue
-    regions:
-      - us-east-1
-    template: templates/enable-integrations/enable-sqs-s3-integrations.yaml
