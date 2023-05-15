@@ -36,15 +36,6 @@ Conditions:
 Resources:
   rKMSKey:
     Type: 'AWS::KMS::Key'
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: F76
-            reason: Need wildcard else PutBucketNotificationConfiguration operation fails with invalid destination.
-      checkov:
-        skip:
-          - id: CKV_AWS_33
-            comment: Need wildcard else PutBucketNotificationConfiguration operation fails with invalid destination.
     Properties:
       Description: !Sub 'KMS Key for the ${pQueueName}'
       EnableKeyRotation: true
@@ -52,17 +43,27 @@ Resources:
         Version: '2012-10-17'
         Id: 'key-default'
         Statement:
+          - Sid: 'Enable IAM User Permissions for S3 to Decrypt'
+            Effect: 'Allow'
+            Principal:
+              Service:
+                - 's3.amazonaws.com'
+            Action:
+              - 'kms:*'
+            Resource: '*'
           - Sid: 'Enable IAM User Permissions'
             Effect: 'Allow'
             Principal:
-              AWS: '*'
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
             Action:
               - 'kms:*'
             Resource: '*'
           - Sid: 'Allow use of the key for encryption'
             Effect: 'Allow'
             Principal:
-              AWS: '*'
+              Service:
+                - 'sqs.amazonaws.com'
             Action:
               - 'kms:Encrypt'
             Resource: '*'
@@ -188,10 +189,6 @@ Resources:
                           {
                               'QueueArn': notification_configuration['QueueConfigurations'][0]['Queue'],
                               'Events': [notification_configuration['QueueConfigurations'][0]['Event']]
-                          },
-                          {
-                              'QueueArn': notification_configuration['QueueConfigurations'][1]['Queue'],
-                              'Events': [notification_configuration['QueueConfigurations'][1]['Event']]
                           }
                       ]
                   }
