@@ -108,3 +108,6 @@ Outputs:
   QRadarIAMRoleArn:
     Description: The ARN of the QRadar IAM role
     Value: !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole'
+  QRadarRegion:
+    Description: AWS Region where the SQS queues and bucket resides.
+    Value: !Ref AWS::Region
