@@ -99,61 +99,12 @@ Resources:
           Value: !Ref pSRAStagingS3KeyPrefix
 
 Outputs:
-  oCloudTrailS3BucketName:
-    Description: Organization CloudTrail S3 Bucket Name
-    Value:
-      !GetAtt [
-        CloudTrailIntegrationStack,
-        Outputs.oOrganizationCloudTrailS3BucketName,
-      ]
-  oCloudTrailS3BucketArn:
-    Description: Organization CloudTrail S3 Bucket Arn
-    Value:
-      !GetAtt [
-        CloudTrailIntegrationStack,
-        Outputs.oOrganizationCloudTrailS3BucketArn,
-      ]
-  oManagementAccountId:
-    Description: Management Account ID
-    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oManagementAccountId]
-  oLogArchiveAccountId:
-    Description: Log Archive Account ID
-    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
-  oAuditAccountId:
-    Description: Audit Account ID
-    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oAuditAccountId]
-  oGuardDutyFindingsBucketName:
-    Description: GuardDuty findings Bucket Name
-    Value:
-      !GetAtt [
-        GuardDutyIntegrationStack,
-        Outputs.oPublishingDestinationBucketName,
-      ]
-  oGuardDutyFindingsBucketArn:
-    Description: GuardDuty findings Bucket Name
-    Value:
-      !GetAtt [
-        GuardDutyIntegrationStack,
-        Outputs.oPublishingDestinationBucketArn,
-      ]
-  oCloudTrailSQSQueueUrl:
+  QRadarCloudTrailSQSQueueUrl:
     Description: SQS URL for the CloudTrail events
     Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueURL]
-  oCloudTrailSQSQueueName:
-    Description: SQS Name for the CloudTrail events
-    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueName]
-  oCloudTrailSQSQueueArn:
-    Description: SQS Arn for the CloudTrail events
-    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueArn]
-  oGuardDutyFindingsSQSQueueUrl:
+  QRadarGuardDutyFindingsSQSQueueUrl:
     Description: SQS URL for the GuardDuty findings
     Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueURL]
-  oGuardDutyFindingsSQSQueueName:
-    Description: SQS Name for the GuardDuty findings
-    Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueName]
-  oGuardDutyFindingsSQSQueueArn:
-    Description: SQS Arn for the GuardDuty findings
-    Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueArn]
   QRadarIAMRoleArn:
     Description: The ARN of the QRadar IAM role
     Value: !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole'
