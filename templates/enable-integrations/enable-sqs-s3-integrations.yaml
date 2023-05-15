@@ -96,23 +96,6 @@ Resources:
       Queues:
         - !Ref rSQSQueue
 
-  rS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref pBucketName
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowLambdaPutBucketNotification
-            Effect: Allow
-            Principal:
-              AWS: !GetAtt rS3NotificationListenerLambdaRole.Arn
-            Action: s3:PutBucketNotification
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref pBucketName
-
   rS3NotificationListenerLambdaCustomResource:
     Type: Custom::LambdaCustomResource
     DeletionPolicy: Delete
