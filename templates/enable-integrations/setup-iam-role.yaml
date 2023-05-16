@@ -52,6 +52,13 @@ Resources:
                   - s3:GetObject
                   - sqs:ReceiveMessage
                   - sqs:GetQueueAttributes
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                  - kms:GetKeyPolicy
+                  - kms:DescribeKey
+                  - kms:GetPublicKey
+                  - kms:ListKeyPolicies
+                  - kms:ListKeys
                 Resource:
                   - !Ref CloudTrailSQSArn
                   - !Ref GuardDutySQSArn
