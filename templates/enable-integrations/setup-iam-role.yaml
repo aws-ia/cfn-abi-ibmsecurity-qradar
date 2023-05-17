@@ -10,6 +10,14 @@ Parameters:
     Type: String
     Description: ARN of SQS queue for the CloudTrail events.
 
+  LogArchiveAccountId:
+    Type: String
+    Description: AccountId for the Log Archive
+
+  AuditAccountId:
+    Type: String
+    Description: AccountId for the Audit
+
   GuardDutySQSArn:
     Type: String
     Description: ARN of SQS Queue for the GuardDuty Findings.
@@ -41,7 +49,7 @@ Resources:
                 - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: Policy1
+        - PolicyName: QradarPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -50,17 +58,19 @@ Resources:
                 Action:
                   - sqs:DeleteMessage
                   - s3:GetObject
+                  - kms:Decrypt
                   - sqs:ReceiveMessage
                   - sqs:GetQueueAttributes
-                  - kms:Decrypt
-                  - kms:DescribeKey
-                  - kms:GetKeyPolicy
-                  - kms:DescribeKey
-                  - kms:GetPublicKey
-                  - kms:ListKeyPolicies
-                  - kms:ListKeys
                 Resource:
+                  - !Sub arn:aws:kms:${AWS::Region}:${LogArchiveAccountId}:key/*
+                  - !Sub arn:aws:kms:${AWS::Region}:${AuditAccountId}:key/*
                   - !Ref CloudTrailSQSArn
                   - !Ref GuardDutySQSArn
-                  - !Ref CloudTrailBucket
-                  - !Ref GuardDutyFindingsBucket
+                  - !Join
+                    - ''
+                    - - !Ref CloudTrailBucket
+                      - '/*'
+                  - !Join
+                    - ''
+                    - - !Ref GuardDutyFindingsBucket
+                      - '/*'

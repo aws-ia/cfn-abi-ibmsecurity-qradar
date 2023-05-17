@@ -76,6 +76,12 @@ Resources:
       Parameters:
         - ParameterKey: PrincipalArn
           ParameterValue: !Ref PrincipalArn
+        - ParameterKey: LogArchiveAccountId
+          ParameterValue:
+            !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
+        - ParameterKey: AuditAccountId
+          ParameterValue:
+            !GetAtt [CloudTrailIntegrationStack, Outputs.oAuditAccountId]
         - ParameterKey: CloudTrailSQSArn
           ParameterValue:
             !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueArn]
