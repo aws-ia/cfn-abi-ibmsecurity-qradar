@@ -35,6 +35,13 @@ Conditions:
 
 Resources:
   QRadarRole:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Allow * in resource when required
+          - id: W12
+            reason: Allow * in policy when required
     Type: AWS::IAM::Role
     Properties:
       RoleName: QRadarRole
