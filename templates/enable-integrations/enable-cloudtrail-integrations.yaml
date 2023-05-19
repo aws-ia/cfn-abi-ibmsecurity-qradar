@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudTrail Integration for QRadar
+
+Parameters:
+  pSRASourceS3BucketName:
+    AllowedPattern: '^([\w.-]{1,900})$|^(\/[\w.-]{1,900})*[\w.-]{1,900}$'
+    ConstraintDescription: Must be alphanumeric or special characters [., _, -]. In addition, the slash character ( / ) used to delineate hierarchies in parameter names.
+    Default: aws-abi-pilot
+    Description: Source bucket for all templates and artefacts that will get copied into staging bucket
+    Type: String
+  pSRAS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    Type: String
+    Default: us-east-1
+  pSRAStagingS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: cfn-abi-ibmsecurity-qradar
+  pCloudTrailQueueName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: qradar-cloudtrail-queue
+  pCloudTrailLambdaFunctionName:
+    AllowedPattern: '^[\w-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [_, -]
+    Default: sra-ct-s3
+    Description: Lambda function name for CloudTrail S3 Event Notification Configuration
+    Type: String
+  pCloudTrailLambdaRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -].
+    Default: sra-ct-s3-lambda
+    Description: Lambda execution role for CloudTrail S3 Event Notification Configuration
+    Type: String
+
+Resources:
+  CloudTrailStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/cfn-abi-aws-cloudtrail/templates/sra-cloudtrail-enable-in-org-ssm.yaml
+      Parameters:
+        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pEnableDataEventsOnly: 'false'
+        pEnableLambdaDataEvents: 'false'
+        pEnableS3DataEvents: 'true'
+      Tags:
+        - Key: sra-solution
+          Value: !Ref pSRAStagingS3KeyPrefix
+
+  CloudTrailEventListenerStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: qradar-cloudtrail-event-stack
+      AdministrationRoleARN: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+      CallAs: SELF
+      Description: Enabled S3 Bucket Event Listener to Send CloudTrail Messages to SQS
+      ExecutionRoleName: AWSControlTowerExecution
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        FailureTolerancePercentage: 0
+        MaxConcurrentPercentage: 100
+        RegionConcurrencyType: PARALLEL
+      PermissionModel: SELF_MANAGED
+      StackInstancesGroup:
+        - DeploymentTargets:
+            Accounts:
+              - !GetAtt [CloudTrailStack, Outputs.oLogArchiveAccountId]
+          Regions:
+            - !Ref AWS::Region
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-sqs-s3-integrations.yaml
+      Parameters:
+        - ParameterKey: pQueueName
+          ParameterValue: !Ref pCloudTrailQueueName
+        - ParameterKey: pBucketName
+          ParameterValue: !GetAtt
+            - CloudTrailStack
+            - Outputs.oOrganizationCloudTrailS3BucketName
+        - ParameterKey: pBucketArn
+          ParameterValue: !GetAtt
+            - CloudTrailStack
+            - Outputs.oOrganizationCloudTrailS3BucketArn
+        - ParameterKey: pLambdaFunctionName
+          ParameterValue: !Ref pCloudTrailLambdaFunctionName
+        - ParameterKey: pLambdaRoleName
+          ParameterValue: !Ref pCloudTrailLambdaRoleName
+      Tags:
+        - Key: sra-solution
+          Value: !Ref pSRAStagingS3KeyPrefix
+
+Outputs:
+  oOrganizationCloudTrailS3BucketName:
+    Description: Organization CloudTrail S3 Bucket Name
+    Value:
+      !GetAtt [CloudTrailStack, Outputs.oOrganizationCloudTrailS3BucketName]
+  oOrganizationCloudTrailS3BucketArn:
+    Description: Organization CloudTrail S3 Bucket Arn
+    Value: !GetAtt [CloudTrailStack, Outputs.oOrganizationCloudTrailS3BucketArn]
+  oManagementAccountId:
+    Description: Management Account ID
+    Value: !GetAtt [CloudTrailStack, Outputs.oManagementAccountId]
+  oLogArchiveAccountId:
+    Description: Log Archive Account ID
+    Value: !GetAtt [CloudTrailStack, Outputs.oLogArchiveAccountId]
+  oAuditAccountId:
+    Description: Audit Account ID
+    Value: !GetAtt [CloudTrailStack, Outputs.oAuditAccountId]
+  oCloudTrailSQSQueueURL:
+    Description: 'SQS URL for the CloudTrail events'
+    Value: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${CloudTrailStack.Outputs.oLogArchiveAccountId}/${pCloudTrailQueueName}'
+  oCloudTrailSQSQueueName:
+    Description: 'SQS Name for the CloudTrail events'
+    Value: !Ref pCloudTrailQueueName
+  oCloudTrailSQSQueueArn:
+    Description: 'Arn for the CloudTrail events queue'
+    Value: !Sub 'arn:aws:sqs:${AWS::Region}:${CloudTrailStack.Outputs.oLogArchiveAccountId}:${pCloudTrailQueueName}'

@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: GuardDuty Integration for QRadar
+
+Parameters:
+  pSRASourceS3BucketName:
+    AllowedPattern: '^([\w.-]{1,900})$|^(\/[\w.-]{1,900})*[\w.-]{1,900}$'
+    ConstraintDescription: Must be alphanumeric or special characters [., _, -]. In addition, the slash character ( / ) used to delineate hierarchies in parameter names.
+    Default: aws-abi-pilot
+    Description: Source bucket for all templates and artefacts that will get copied into staging bucket
+    Type: String
+  pSRAS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    Type: String
+    Default: us-east-1
+  pSRAStagingS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: cfn-abi-ibmsecurity-qradar
+  pGuardDutyQueueName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: qradar-guardduty-queue
+  pLogArchiveAccountId:
+    AllowedPattern: '^\d{12}$'
+    ConstraintDescription: Must be 12 digits
+    Description: LogArchive Account ID
+    Type: String
+  pGuardDutyLambdaFunctionName:
+    AllowedPattern: '^[\w-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [_, -]
+    Default: sra-gd-s3
+    Description: Lambda function name for GuardDuty S3 Event Notification Configuration
+    Type: String
+  pGuardDutyLambdaRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -].
+    Default: sra-gd-s3-lambda
+    Description: Lambda execution role for GuardDuty S3 Event Notification Configuration
+    Type: String
+
+Resources:
+  GuardDutyStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/cfn-abi-amazon-guardduty/templates/sra-guardduty-enable-in-org-ssm.yaml
+      Parameters:
+        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pSraTestingFlag: 'false'
+        pAutoEnableS3Logs: 'true'
+        pAutoEnableK8sLogs: 'false'
+        pAutoEnableMalwareProtection: 'false'
+      Tags:
+        - Key: sra-solution
+          Value: !Ref pSRAStagingS3KeyPrefix
+
+  GuardDutyEventListenerStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: qradar-guardduty-event-stack
+      AdministrationRoleARN: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+      CallAs: SELF
+      Description: Enabled S3 Bucket Event Listener to Send GuardDuty finding events to SQS
+      ExecutionRoleName: AWSControlTowerExecution
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        FailureTolerancePercentage: 0
+        MaxConcurrentPercentage: 100
+        RegionConcurrencyType: PARALLEL
+      PermissionModel: SELF_MANAGED
+      StackInstancesGroup:
+        - DeploymentTargets:
+            Accounts:
+              - !Ref pLogArchiveAccountId
+          Regions:
+            - !Ref AWS::Region
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-sqs-s3-integrations.yaml
+      Parameters:
+        - ParameterKey: pQueueName
+          ParameterValue: !Ref pGuardDutyQueueName
+        - ParameterKey: pBucketName
+          ParameterValue: !GetAtt
+            - GuardDutyStack
+            - Outputs.oPublishingDestinationBucketName
+        - ParameterKey: pBucketArn
+          ParameterValue: !GetAtt
+            - GuardDutyStack
+            - Outputs.oPublishingDestinationBucketArn
+        - ParameterKey: pLambdaFunctionName
+          ParameterValue: !Ref pGuardDutyLambdaFunctionName
+        - ParameterKey: pLambdaRoleName
+          ParameterValue: !Ref pGuardDutyLambdaRoleName
+      Tags:
+        - Key: sra-solution
+          Value: !Ref pSRAStagingS3KeyPrefix
+
+Outputs:
+  oPublishingDestinationBucketName:
+    Description: Publishing Destination Bucket Name
+    Value: !GetAtt [GuardDutyStack, Outputs.oPublishingDestinationBucketName]
+  oPublishingDestinationBucketArn:
+    Description: Publishing Destination Bucket Name
+    Value: !GetAtt [GuardDutyStack, Outputs.oPublishingDestinationBucketArn]
+  oGuardDutySQSQueueURL:
+    Description: 'SQS URL for the GuardDuty findings'
+    Value: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${pLogArchiveAccountId}/${pGuardDutyQueueName}'
+  oGuardDutySQSQueueName:
+    Description: 'SQS Name for the GuardDuty findings'
+    Value: !Ref pGuardDutyQueueName
+  oGuardDutySQSQueueArn:
+    Description: 'Arn for the GuardDuty findings queue'
+    Value: !Sub 'arn:aws:sqs:${AWS::Region}:${pLogArchiveAccountId}:${pGuardDutyQueueName}'
