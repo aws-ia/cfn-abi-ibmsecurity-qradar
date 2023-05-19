@@ -1,0 +1,6 @@
+[submodule "submodules/cfn-abi-amazon-guardduty"]
+	path = submodules/cfn-abi-amazon-guardduty
+	url = https://github.com/aws-ia/cfn-abi-amazon-guardduty
+[submodule "submodules/cfn-abi-aws-cloudtrail"]
+	path = submodules/cfn-abi-aws-cloudtrail
+	url = https://github.com/aws-ia/cfn-abi-aws-cloudtrail

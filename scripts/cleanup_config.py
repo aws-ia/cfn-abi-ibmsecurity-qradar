@@ -20,7 +20,6 @@ SSM = SESSION.client('ssm')
 S3 = SESSION.client('s3')
 STS = SESSION.client('sts')
 ORG  = SESSION.client('organizations')
-GD  = SESSION.client('guardduty')
 
 STACKSTATUS = [ 'ROLLBACK_FAILED', 'ROLLBACK_COMPLETE', 'DELETE_FAILED', 'DELETE_COMPLETE']
 
@@ -235,7 +234,6 @@ def get_temp_credentials(aws_account, role_name='AWSControlTowerExecution'):
             print('Error assuming role: %s', role_arn)
 
     return result
-
 def establish_remote_session(account):
     '''
     Establish remote session
@@ -243,7 +241,6 @@ def establish_remote_session(account):
 
     roles = ['AWSControlTowerExecution', 'OrganizationAccountAccessRole']
     result = None
-
     for role in roles:
         sts_creds = get_temp_credentials(account, role)
         if sts_creds:
@@ -253,7 +250,6 @@ def establish_remote_session(account):
             aws_session_token=sts_creds['SessionToken']
             )
             break
-
     return result
 
 def get_log_archive_account(parameter_name='/sra/gd/control-tower/log-archive-account-id'):
@@ -272,7 +268,7 @@ def get_list_of_accounts():
     for page in paginator.paginate():
         accounts += page['Accounts']
     return accounts
-
+    
 def get_account_id(filters='Log Archive'):
     '''
     Get log account ID
@@ -309,7 +305,6 @@ def delete_cw_logs(filters='sra/sra-org-trail', account=None):
         print('Account-ID: %s', account)
     else:
         cwlogs = SESSION.client('logs')
-
     log_groups = list_cw_lognames(context=cwlogs)
     print(filters)
     for log_group_name in log_groups:
@@ -323,40 +318,43 @@ def get_management_account_id():
     '''
     return ORG.describe_organization()['Organization']['MasterAccountId']
 
-def get_list_of_detectors():
+def get_list_of_detectors(gd_client):
     '''
     Get list of GuardDuty detectors
     '''
     detectors = []
-    paginator = GD.get_paginator('list_detectors')
+    paginator = gd_client.get_paginator('list_detectors')
     for page in paginator.paginate():
         detectors += page['DetectorIds']
     return detectors
-
 def delete_detector():
     '''
     Delete the GuardDuty detectors in all accounts in the organization in the current region
     '''
     accounts = get_list_of_accounts()
     mgt_acct_id = get_management_account_id()
-
-    for account in accounts:
+    #print(mgt_acct_id)
+    
+    for account in accounts: 
+        #print(account['Id'])
         if mgt_acct_id != account['Id']:
             session = establish_remote_session(account['Id'])
             if session:
                 gd_client = session.client('guardduty')
+                print("Creating GD session in %s", account['Id'])
             else:
                 print('Unable to establish session for account: %s', account['Id'])
                 gd_client = None
         else: # Management account
             gd_client = boto3.client('guardduty')
-
         if gd_client:
-            detector_ids = get_list_of_detectors()
+            detector_ids = get_list_of_detectors(gd_client)
+            print("Detector IDs")
+            print(detector_ids)
             for det_id in detector_ids:
+                print(det_id)
                 print('Deleting GuardDuty Detector in %s', account['Id'])
                 gd_client.delete_detector(DetectorId=det_id)
-
 def run_cleanup(config):
     '''
     Run the cleanup
@@ -386,7 +384,6 @@ def run_cleanup(config):
             delete_detector()
         else:
             print('Invalid type in cleanup_config.json: %s', item['Type'])
-
 
 if __name__ == '__main__':
     PARSER = argparse.ArgumentParser(prog='cleanup_config.py',

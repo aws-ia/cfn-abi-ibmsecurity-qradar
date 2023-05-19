@@ -1,0 +1,70 @@
+[
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "sra-guardduty-org-delivery-",
+    "Account": "log_account"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "cfn-abi-amazon-guardduty-"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "sra-gd-staging-"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "tcat-"
+  },
+  {
+    "Type": "SSM_PARAMETER",
+    "Filter": "/sra/gd/"
+  },
+  {
+    "Type": "STACK",
+    "Filter": "tCaT-enable-cloudtrail-ssm-"
+  },
+  {
+    "Type": "STACK",
+    "Filter": "tCaT-stage-ctrail-content-local-"
+  },
+  {
+    "Type": "STACK",
+    "Filter": "org-level-trail-dataevent-only"
+  },
+  {
+    "Type": "STACK",
+    "Filter": "org-level-trail-with-mgmt-events"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "sra-cloudtrail-staging-"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "sra-org-trail-logs-",
+    "Account": "log_account"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "cfn-abi-aws-cloudtrail-"
+  },
+  {
+    "Type": "SSM_PARAMETER",
+    "Filter": "/sra/ctrail/"
+  },
+  {
+    "Type": "LOG_GROUP",
+    "Filter": "sra/sra-org-trail"
+  },
+  {
+    "Type": "LOG_GROUP",
+    "Filter": "/aws/lambda/sra-ct-s3",
+    "Account": "log_account"
+  },
+  {
+    "Type": "LOG_GROUP",
+    "Filter": "/aws/lambda/sra-gd-s3",
+    "Account": "log_account"
+  }
+]

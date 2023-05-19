@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: QRadar Integration
+
+Parameters:
+  PrincipalArn:
+    Type: String
+    Description: ARN of the principal that can assume the role
+    Default: ''
+  pSRASourceS3BucketName:
+    AllowedPattern: '^([\w.-]{1,900})$|^(\/[\w.-]{1,900})*[\w.-]{1,900}$'
+    ConstraintDescription: Must be alphanumeric or special characters [., _, -]. In addition, the slash character ( / ) used to delineate hierarchies in parameter names.
+    Default: aws-abi-pilot
+    Description: Source bucket for all templates and artefacts that will get copied into staging bucket
+    Type: String
+  pSRAS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    Type: String
+    Default: us-east-1
+  pSRAStagingS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Type: String
+    Default: cfn-abi-ibmsecurity-qradar
+
+Resources:
+  CloudTrailIntegrationStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-cloudtrail-integrations.yaml
+      Parameters:
+        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
+        pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
+
+  GuardDutyIntegrationStack:
+    Type: AWS::CloudFormation::Stack
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-guardduty-integrations.yaml
+      Parameters:
+        pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
+        pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
+        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pLogArchiveAccountId:
+          !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
+
+  SetupIAMRoleStack:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: qradar-setup-iam-role-stack
+      AdministrationRoleARN: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
+      CallAs: SELF
+      Description: Setup necessary IAM roles needed for the QRadar application to access the services
+      ExecutionRoleName: AWSControlTowerExecution
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        FailureTolerancePercentage: 0
+        MaxConcurrentPercentage: 100
+        RegionConcurrencyType: PARALLEL
+      PermissionModel: SELF_MANAGED
+      StackInstancesGroup:
+        - DeploymentTargets:
+            Accounts:
+              - !GetAtt [
+                  CloudTrailIntegrationStack,
+                  Outputs.oLogArchiveAccountId,
+                ]
+          Regions:
+            - !Ref AWS::Region
+      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/setup-iam-role.yaml
+      Parameters:
+        - ParameterKey: PrincipalArn
+          ParameterValue: !Ref PrincipalArn
+        - ParameterKey: LogArchiveAccountId
+          ParameterValue:
+            !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
+        - ParameterKey: AuditAccountId
+          ParameterValue:
+            !GetAtt [CloudTrailIntegrationStack, Outputs.oAuditAccountId]
+        - ParameterKey: CloudTrailSQSArn
+          ParameterValue:
+            !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueArn]
+        - ParameterKey: GuardDutySQSArn
+          ParameterValue:
+            !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueArn]
+        - ParameterKey: CloudTrailBucket
+          ParameterValue:
+            !GetAtt [
+              CloudTrailIntegrationStack,
+              Outputs.oOrganizationCloudTrailS3BucketArn,
+            ]
+        - ParameterKey: GuardDutyFindingsBucket
+          ParameterValue:
+            !GetAtt [
+              GuardDutyIntegrationStack,
+              Outputs.oPublishingDestinationBucketArn,
+            ]
+      Tags:
+        - Key: sra-solution
+          Value: !Ref pSRAStagingS3KeyPrefix
+
+Outputs:
+  QRadarCloudTrailSQSQueueUrl:
+    Description: SQS URL for the CloudTrail events
+    Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueURL]
+  QRadarGuardDutyFindingsSQSQueueUrl:
+    Description: SQS URL for the GuardDuty findings
+    Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueURL]
+  QRadarIAMRoleArn:
+    Description: The ARN of the QRadar IAM role
+    Value: !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole'
+  QRadarRegion:
+    Description: AWS Region where the SQS queues and bucket resides.
+    Value: !Ref AWS::Region
