@@ -1,6 +1,6 @@
 
 
-# IBM QRadar Amazon Built-in Quickstart
+# IBM QRadar Amazon Built-in Startup Guide
 
 ## **Prerequisites:**
 
