@@ -13,25 +13,35 @@ Parameters:
   LogArchiveAccountId:
     Type: String
     Description: AccountId for the Log Archive
+    Default: ''
 
   AuditAccountId:
     Type: String
     Description: AccountId for the Audit
+    Default: ''
 
   GuardDutySQSArn:
     Type: String
     Description: ARN of SQS Queue for the GuardDuty Findings.
+    Default: ''
 
   CloudTrailBucket:
     Type: String
     Description: ARN of the CloudTrail logs bucket
+    Default: ''
 
   GuardDutyFindingsBucket:
     Type: String
     Description: ARN of the GuardDuty Findings Bucket
+    Default: ''
 
 Conditions:
   HasPrincipalArn: !Not [!Equals [!Ref PrincipalArn, '']]
+  CloudTrailSQSArnNotEmpty: !Not [!Equals [!Ref CloudTrailSQSArn, '']]
+  GuardDutySQSArnNotEmpty: !Not [!Equals [!Ref GuardDutySQSArn, '']]
+  CloudTrailBucketNotEmpty: !Not [!Equals [!Ref CloudTrailBucket, '']]
+  GuardDutyFindingsBucketNotEmpty:
+    !Not [!Equals [!Ref GuardDutyFindingsBucket, '']]
 
 Resources:
   QRadarRole:
@@ -71,13 +81,23 @@ Resources:
                 Resource:
                   - !Sub arn:aws:kms:${AWS::Region}:${LogArchiveAccountId}:key/*
                   - !Sub arn:aws:kms:${AWS::Region}:${AuditAccountId}:key/*
-                  - !Ref CloudTrailSQSArn
-                  - !Ref GuardDutySQSArn
-                  - !Join
-                    - ''
-                    - - !Ref CloudTrailBucket
-                      - '/*'
-                  - !Join
-                    - ''
-                    - - !Ref GuardDutyFindingsBucket
-                      - '/*'
+                  - !If [
+                      CloudTrailSQSArnNotEmpty,
+                      !Ref CloudTrailSQSArn,
+                      !Ref 'AWS::NoValue',
+                    ]
+                  - !If [
+                      GuardDutySQSArnNotEmpty,
+                      !Ref GuardDutySQSArn,
+                      !Ref 'AWS::NoValue',
+                    ]
+                  - !If [
+                      CloudTrailBucketNotEmpty,
+                      !Sub '${CloudTrailBucket}/*',
+                      !Ref 'AWS::NoValue',
+                    ]
+                  - !If [
+                      GuardDutyFindingsBucketNotEmpty,
+                      !Sub '${GuardDutyFindingsBucket}/*',
+                      !Ref 'AWS::NoValue',
+                    ]

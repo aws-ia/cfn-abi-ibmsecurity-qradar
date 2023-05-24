@@ -8,7 +8,7 @@ project:
     - us-east-1
 
 tests:
-  launch-qradar-main:
+  launch-qradar-main-default:
     parameters:
       pSRASourceS3BucketName: $[taskcat_autobucket]
       pSRAS3BucketRegion: $[taskcat_current_region]
@@ -16,3 +16,34 @@ tests:
     regions:
       - us-east-1
     template: templates/abi-enable-qradar-integration.yaml
+
+  launch-qradar-main-both:
+    parameters:
+      pSRASourceS3BucketName: $[taskcat_autobucket]
+      pSRAS3BucketRegion: $[taskcat_current_region]
+      pSRAStagingS3KeyPrefix: $[taskcat_project_name]
+      pEnableCloudTrial: 'true'
+      pEnableGuardDuty: 'true'
+    regions:
+      - us-east-1
+    template: templates/abi-enable-qradar-integration.yaml
+
+  # launch-qradar-main-only-ct:
+  #   parameters:
+  #     pSRASourceS3BucketName: $[taskcat_autobucket]
+  #     pSRAS3BucketRegion: $[taskcat_current_region]
+  #     pSRAStagingS3KeyPrefix: $[taskcat_project_name]
+  #     pEnableCloudTrial: 'true'
+  #   regions:
+  #     - us-east-1
+  #   template: templates/abi-enable-qradar-integration.yaml
+
+  # launch-qradar-main-only-gd:
+  #   parameters:
+  #     pSRASourceS3BucketName: $[taskcat_autobucket]
+  #     pSRAS3BucketRegion: $[taskcat_current_region]
+  #     pSRAStagingS3KeyPrefix: $[taskcat_project_name]
+  #     pEnableGuardDuty: 'true'
+  #   regions:
+  #     - us-east-1
+  #   template: templates/abi-enable-qradar-integration.yaml
