@@ -20,12 +20,30 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: cfn-abi-ibmsecurity-qradar
+  pEnableGuardDuty:
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: Enable GuardDuty at Organization level
+    Type: String
+  pEnableCloudTrial:
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: Enable CloudTrail
+    Type: String
+
+Conditions:
+  cEnableGuardDuty: !Equals [!Ref pEnableGuardDuty, 'true']
+  cEnableCloudTrial: !Equals [!Ref pEnableCloudTrial, 'true']
+  cEnableSetupIAMRoleStack: !Or
+    - !Equals [!Ref pEnableGuardDuty, 'true']
+    - !Equals [!Ref pEnableCloudTrial, 'true']
 
 Resources:
   CloudTrailIntegrationStack:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
+    Condition: cEnableCloudTrial
     Properties:
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-cloudtrail-integrations.yaml
       Parameters:
@@ -37,17 +55,17 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
+    Condition: cEnableGuardDuty
     Properties:
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-guardduty-integrations.yaml
       Parameters:
         pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
         pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
         pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
-        pLogArchiveAccountId:
-          !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
 
   SetupIAMRoleStack:
     Type: AWS::CloudFormation::StackSet
+    Condition: cEnableSetupIAMRoleStack
     Properties:
       StackSetName: qradar-setup-iam-role-stack
       AdministrationRoleARN: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/service-role/AWSControlTowerStackSetRole
@@ -66,10 +84,13 @@ Resources:
       StackInstancesGroup:
         - DeploymentTargets:
             Accounts:
-              - !GetAtt [
-                  CloudTrailIntegrationStack,
-                  Outputs.oLogArchiveAccountId,
-                ]
+              - !If
+                - cEnableCloudTrial
+                - !GetAtt CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId
+                - !If
+                  - cEnableGuardDuty
+                  - !GetAtt GuardDutyIntegrationStack.Outputs.oLogArchiveAccountId
+                  - !Ref 'AWS::NoValue'
           Regions:
             - !Ref AWS::Region
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/setup-iam-role.yaml
@@ -78,28 +99,47 @@ Resources:
           ParameterValue: !Ref PrincipalArn
         - ParameterKey: LogArchiveAccountId
           ParameterValue:
-            !GetAtt [CloudTrailIntegrationStack, Outputs.oLogArchiveAccountId]
+            !If [
+              cEnableCloudTrial,
+              !GetAtt CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId,
+              !GetAtt GuardDutyIntegrationStack.Outputs.oLogArchiveAccountId,
+            ]
         - ParameterKey: AuditAccountId
           ParameterValue:
-            !GetAtt [CloudTrailIntegrationStack, Outputs.oAuditAccountId]
+            !If [
+              cEnableCloudTrial,
+              !GetAtt CloudTrailIntegrationStack.Outputs.oAuditAccountId,
+              !GetAtt GuardDutyIntegrationStack.Outputs.oAuditAccountId,
+            ]
         - ParameterKey: CloudTrailSQSArn
           ParameterValue:
-            !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueArn]
+            !If [
+              cEnableCloudTrial,
+              !GetAtt CloudTrailIntegrationStack.Outputs.oCloudTrailSQSQueueArn,
+              '',
+            ]
         - ParameterKey: GuardDutySQSArn
           ParameterValue:
-            !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueArn]
+            !If [
+              cEnableGuardDuty,
+              !GetAtt GuardDutyIntegrationStack.Outputs.oGuardDutySQSQueueArn,
+              '',
+            ]
         - ParameterKey: CloudTrailBucket
           ParameterValue:
-            !GetAtt [
-              CloudTrailIntegrationStack,
-              Outputs.oOrganizationCloudTrailS3BucketArn,
+            !If [
+              cEnableCloudTrial,
+              !GetAtt CloudTrailIntegrationStack.Outputs.oOrganizationCloudTrailS3BucketArn,
+              '',
             ]
         - ParameterKey: GuardDutyFindingsBucket
           ParameterValue:
-            !GetAtt [
-              GuardDutyIntegrationStack,
-              Outputs.oPublishingDestinationBucketArn,
+            !If [
+              cEnableGuardDuty,
+              !GetAtt GuardDutyIntegrationStack.Outputs.oPublishingDestinationBucketArn,
+              '',
             ]
+
       Tags:
         - Key: sra-solution
           Value: !Ref pSRAStagingS3KeyPrefix
@@ -108,12 +148,20 @@ Outputs:
   QRadarCloudTrailSQSQueueUrl:
     Description: SQS URL for the CloudTrail events
     Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueURL]
+    Condition: cEnableCloudTrial
   QRadarGuardDutyFindingsSQSQueueUrl:
     Description: SQS URL for the GuardDuty findings
     Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueURL]
-  QRadarIAMRoleArn:
-    Description: The ARN of the QRadar IAM role
-    Value: !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole'
+    Condition: cEnableGuardDuty
   QRadarRegion:
     Description: AWS Region where the SQS queues and bucket resides.
     Value: !Ref AWS::Region
+  QRadarIAMRoleArn:
+    Description: The ARN of the QRadar IAM role
+    Condition: cEnableSetupIAMRoleStack
+    Value:
+      !If [
+        cEnableCloudTrial,
+        !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole',
+        !Sub 'arn:aws:iam::${GuardDutyIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole',
+      ]
