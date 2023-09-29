@@ -2,7 +2,7 @@
 
 ## Deploying this ABI package builds the following architecture:
 
-  
+![Architecture diagram](/images/architecture.png)
 
 **In all current and AWS accounts in your AWS organization:**
 

@@ -14,6 +14,6 @@ Deploying this ABI package does not guarantee an organization’s compliance wit
 
 ### AWS Marketplace listing
 
-[Partner-product-name-in-aws-marketplace](https://aws.amazon.com/marketplace/pp/prodview-<marketplace-id>)
+[IBM Security QRadar Log Insights SaaS (US)](https://aws.amazon.com/marketplace/pp/prodview-p2llj6q6wlsq4)
 
 **Next:** Choose [Terminologies](/terminologies/index.html) to get started.
