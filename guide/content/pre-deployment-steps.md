@@ -10,6 +10,4 @@ Before deploying this ABI package, complete the following steps:
 
 * Your AWS account setup must be using either AWS Control Tower or AWS Organizations
 
-* Become familiar with the [additional resources](https://link), later in this guide.
-
 **Next:** Choose **[Deployment Steps](/deployment-steps/index.html)** to get started.
