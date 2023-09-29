@@ -20,11 +20,6 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: qradar-guardduty-queue
-  pLogArchiveAccountId:
-    AllowedPattern: '^\d{12}$'
-    ConstraintDescription: Must be 12 digits
-    Description: LogArchive Account ID
-    Type: String
   pGuardDutyLambdaFunctionName:
     AllowedPattern: '^[\w-]{1,64}$'
     ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [_, -]
@@ -75,7 +70,7 @@ Resources:
       StackInstancesGroup:
         - DeploymentTargets:
             Accounts:
-              - !Ref pLogArchiveAccountId
+              - !GetAtt [GuardDutyStack, Outputs.oLogArchiveAccountId]
           Regions:
             - !Ref AWS::Region
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-sqs-s3-integrations.yaml
@@ -107,10 +102,22 @@ Outputs:
     Value: !GetAtt [GuardDutyStack, Outputs.oPublishingDestinationBucketArn]
   oGuardDutySQSQueueURL:
     Description: 'SQS URL for the GuardDuty findings'
-    Value: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${pLogArchiveAccountId}/${pGuardDutyQueueName}'
+    Value: !Sub 'https://sqs.${AWS::Region}.amazonaws.com/${GuardDutyStack.Outputs.oLogArchiveAccountId}/${pGuardDutyQueueName}'
   oGuardDutySQSQueueName:
     Description: 'SQS Name for the GuardDuty findings'
     Value: !Ref pGuardDutyQueueName
   oGuardDutySQSQueueArn:
     Description: 'Arn for the GuardDuty findings queue'
-    Value: !Sub 'arn:aws:sqs:${AWS::Region}:${pLogArchiveAccountId}:${pGuardDutyQueueName}'
+    Value: !Sub 'arn:aws:sqs:${AWS::Region}:${GuardDutyStack.Outputs.oLogArchiveAccountId}:${pGuardDutyQueueName}'
+  oLogArchiveAccountId:
+    Description: Log Archive Account ID
+    Value: !GetAtt [GuardDutyStack, Outputs.oLogArchiveAccountId]
+  oManagementAccountId:
+    Description: Management Account ID
+    Value: !GetAtt [GuardDutyStack, Outputs.oManagementAccountId]
+  oRootOrganizationalUnitId:
+    Description: Root Organizational Unit ID
+    Value: !GetAtt [GuardDutyStack, Outputs.oRootOrganizationalUnitId]
+  oAuditAccountId:
+    Description: Audit Account ID
+    Value: !GetAtt [GuardDutyStack, Outputs.oAuditAccountId]
