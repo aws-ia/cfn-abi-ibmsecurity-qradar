@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: GuardDuty Integration for QRadar
+Description: "GuardDuty Integration for QRadar. (abi-1kirFQBF75MfEQ3RbMQHRb-5Qgs4qOsPgbXnTtlFjeTTo-ln88rrkg)"
 
 Parameters:
   pSRASourceS3BucketName:
