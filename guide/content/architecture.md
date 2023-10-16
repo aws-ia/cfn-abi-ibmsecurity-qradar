@@ -4,23 +4,23 @@
 
 ![Architecture diagram](/images/architecture.png)
 
-**In all current and AWS accounts in your AWS organization:**
+**In all existing and future AWS accounts in your AWS organization:**
 
 
-* If CloudTrail setup is chosen when deploying the QRadar ABI template, all actions defined in https://github.com/aws-ia/cfn-abi-aws-cloudtrail/tree/main will be performed
+* If CloudTrail setup is chosen when deploying the QRadar ABI template, all actions defined in the  [AWS CloudTrail SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/cloudtrail/cloudtrail_org) will be performed
 
-* If Guard Duty setup is chosen when deploying the QRadar ABI template, all actions defined in https://github.com/aws-ia/cfn-abi-amazon-guardduty/tree/main will be performed
+* If Guard Duty setup is chosen when deploying the QRadar ABI template, all actions defined in the [Amazon GuardDuty SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/guardduty/guardduty_org) will be performed
 
   
 **In the log archive account:**
 
-*If CloudTrail setup is chosen:*
+*If CloudTrail setup is chosen, the following resources are created:
 
 * An SQS Queue will be created to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's CloudTrail data
 
 * `ObjectCreated` notifications on the S3 bucket monitoring the path to the CloudTrail data for all accounts and regions and targeting the above SQS queue
 
-*If Guard Duty setup is chosen:*
+*If Guard Duty setup is chosen, the following resources are created:
 
 * An SQS Queue will be created to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's Guard Duty data
 

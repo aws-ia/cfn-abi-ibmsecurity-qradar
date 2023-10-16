@@ -4,7 +4,7 @@ title: Deployment steps
 description: Deployment steps
 ---
 
-## Launch the CloudFormation Template in the Management Account
+## Launch the CloudFormation template in the AWS Organizations management account {#launch-cfn}
 
 1. Download the cloudformation template from source: https://abi-qradar-demo-rpjc5noqyz36.s3.amazonaws.com/abi-enable-qradar-integration.yaml (DRAFT)
 
@@ -23,7 +23,7 @@ Enable CloudTrail at the Organization level
 * **pEnableGuardDuty**: `true` (Default: false)
 Enable GuardDuty at the Organization level
 
-* **pSRAS3BucketRegion**: `us-east-1` (Default : should not require changing)
+* **pSRAS3BucketRegion**: `us-east-1` (Default : Do not change unless pSRASourceS3BucketName is changed to your own S3 bucket. In that case, match the region with AWS region where the S3 bucket is created)
 
 * **pSRASourceS3BucketName**: `aws-abi-pilot` (Default : should not require changing)
 
@@ -48,7 +48,7 @@ Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
   
 
-## Launch using Customizations for Control Tower (CfCT)
+## Launch using Customizations for Control Tower {#launch-cfct}
 
   
 
@@ -79,34 +79,24 @@ To deploy this sample partner integration page using CfCT solution, add the foll
   
 
 ```
-
 resources:
-
-- name: sra-enable-partner1-solution
-
-resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-aws-reference-guide/templates/abi-enable-partner1-securityhub-integration.yaml
-
-deploy_method: stack_set
-
-parameters:
-
-- parameter_key: pProductArn
-
-parameter_value: arn:aws:securityhub:us-east-1::product/cloud-custodian/cloud-custodian
-
-- parameter_key: pSRASourceS3BucketName
-
-parameter_value: aws-abi-pilot
-
-- parameter_key: pSRAStagingS3KeyPrefix
-
-parameter_value: cfn-abi-aws-reference-guide
-
-deployment_targets:
-
-accounts:
-
-- [[MANAGEMENT-AWS-ACCOUNT-ID]]
+  - name: launch-qradar-main-abi
+    resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-ibmsecurity-qradar/templates/abi-enable-qradar-integration.yaml
+    deploy_method: stack_set
+    parameters:
+      - parameter_key: pEnableCloudTrial
+        parameter_value: 'false'  # Set to 'true' to enable CloudTrail integration
+      - parameter_key: pEnableGuardDuty
+        parameter_value: 'false'  # Set to 'true' to enable GuardDuty integration
+      - parameter_key: pSRASourceS3BucketName
+        parameter_value: aws-abi
+      - parameter_key: pSRAS3BucketRegion
+        parameter_value: us-east-1
+      - parameter_key: pSRAStagingS3KeyPrefix
+        parameter_value: cfn-abi-ibmsecurity-qradar
+    deployment_targets:
+      accounts:
+        - [[MANAGEMENT-AWS-ACCOUNT-ID]]
 
 ```
 
