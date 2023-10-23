@@ -44,16 +44,20 @@ To deploy this sample partner integration page using CfCT solution, add the foll
 
 ```
 resources:
-  - name: sra-enable-partner1-solution
-    resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-aws-reference-guide/templates/abi-enable-partner1-securityhub-integration.yaml
+  - name: launch-qradar-main-abi
+    resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-ibmsecurity-qradar/templates/abi-enable-qradar-integration.yaml
     deploy_method: stack_set
     parameters:
-      - parameter_key: pProductArn
-        parameter_value: arn:aws:securityhub:us-east-1::product/cloud-custodian/cloud-custodian
+      - parameter_key: pEnableCloudTrial
+        parameter_value: 'false'  # Set to 'true' to enable CloudTrail integration
+      - parameter_key: pEnableGuardDuty
+        parameter_value: 'false'  # Set to 'true' to enable GuardDuty integration
       - parameter_key: pSRASourceS3BucketName
-        parameter_value: aws-abi-pilot
+        parameter_value: aws-abi
+      - parameter_key: pSRAS3BucketRegion
+        parameter_value: us-east-1
       - parameter_key: pSRAStagingS3KeyPrefix
-        parameter_value: cfn-abi-aws-reference-guide
+        parameter_value: cfn-abi-ibmsecurity-qradar
     deployment_targets:
       accounts:
         - [[MANAGEMENT-AWS-ACCOUNT-ID]]
