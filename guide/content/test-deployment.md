@@ -1,14 +1,17 @@
+
 ---
+
 weight: 10
+
 title: Test the deployment
+
 description: Test the deployment
+
 ---
 
-## Step-1
+ 
+## Verify Successful Ingestion Data Source Configuration
+After setting up the Ingestion Data Sources and waiting a few minutes, open **Data Explorer** in **QRadar Log Insights** and perform a search for the last 5 minutes and verify that CloudTrail Logs and/or Guard Duty Findings are being ingested into the system.
+    
 
-## Step-2
-
-## Step-3
-
-
-**Next:** Choose [Additonal Resources](/additional-resources/index.html) to get started.
+**Next:** Choose [Additional Resources](/additional-resources/index.html) to get started.
