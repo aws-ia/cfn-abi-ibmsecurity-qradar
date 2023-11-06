@@ -5,7 +5,7 @@ description:
 ---
 
 
-This [AWS Built in](https://aws.amazon.com/partners/built-in-partner-solutions/) (ABI) solution deploys IBM QRadar Integrations for AWS Organizations on the AWS Cloud. It’s for QRadar Log Insights, QRadar On Cloud (QRoC), and QRadar SIEM customers that want to provide AWS Cloudtrail and Amazon Guard Duty integrations across multiple AWS accounts.
+This [AWS Built in](https://aws.amazon.com/partners/built-in-partner-solutions/) (ABI) solution deploys IBM QRadar Integrations for AWS Organizations on the AWS Cloud. It’s for QRadar Log Insights, QRadar On Cloud (QRoC), and QRadar SIEM customers that want to provide AWS Cloudtrail and Amazon GuardDuty integrations across multiple AWS accounts.
 
 Deploying this ABI package does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations.
 

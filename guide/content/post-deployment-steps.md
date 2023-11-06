@@ -11,7 +11,7 @@ description: Post deployment options
 
   
 
-# Configure QRadar Log Insights to ingest the CloudTrail and Guard Duty Data
+# Configure QRadar Log Insights to ingest the CloudTrail and GuardDuty Data
 
   
 
@@ -45,7 +45,7 @@ Any options such as Proxy Server, EPS Throttle, or other Advanced options may be
 
   
 
-## Amazon Guard Duty
+## Amazon GuardDuty
 
 **On the Overview Tab:**
 | Parameter |Value  |
