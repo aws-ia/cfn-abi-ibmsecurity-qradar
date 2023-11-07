@@ -6,13 +6,15 @@ description: Additional Resources
 
 ## Partner documentation
 
-* Reference-1
-* Reference-2
+* IBM Security QRadar Log Insights - https://www.ibm.com/products/qradar-log-insights
 
 ## AWS Services
 
-* Reference-1
-* Reference-2
+* AWS CloudTrail - https://aws.amazon.com/cloudtrail/
+* Amazon GuardDuty - https://aws.amazon.com/guardduty/
+* AWS Control Tower - https://aws.amazon.com/controltower/
+* AWS Organizations - https://aws.amazon.com/organizations/
+* AWS CloudFormation - https://aws.amazon.com/cloudformation/
 
 ## Frequently asked questions (FAQs)
 
