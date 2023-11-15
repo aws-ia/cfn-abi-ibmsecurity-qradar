@@ -32,12 +32,6 @@ Parameters:
     Default: sra-gd-s3-lambda
     Description: Lambda execution role for GuardDuty S3 Event Notification Configuration
     Type: String
-  pSRAAlarmEmail:
-    AllowedPattern: '^$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$'
-    ConstraintDescription: Must be a valid email address.
-    Default: ''
-    Description: (Optional) Email address for receiving SRA alarms
-    Type: String
   pDisableGuardDuty:
     AllowedValues: ['Yes', 'No']
     Default: 'No'
@@ -111,9 +105,14 @@ Resources:
         pRepoBranch: !Ref pRepoBranch
         pSRAAlarmEmail: !Ref pSRAAlarmEmail
         pDisableGuardDuty: !Ref pDisableGuardDuty
-        pAutoEnableS3Logs: 'true'
-        pAutoEnableKubernetesAuditLogs: 'false'
-        pAutoEnableMalwareProtection: 'false'
+        pAutoEnableS3Logs: !Ref pAutoEnableS3Logs
+        pAutoEnableKubernetesAuditLogs: !Ref pAutoEnableKubernetesAuditLogs
+        pAutoEnableMalwareProtection: !Ref pAutoEnableMalwareProtection
+        pEnableRdsLoginEvents: !Ref pEnableRdsLoginEvents
+        pEnableEksRuntimeMonitoring: !Ref pEnableEksRuntimeMonitoring
+        pEnableEksAddonManagement: !Ref pEnableEksAddonManagement
+        pEnableLambdaNetworkLogs: !Ref pEnableLambdaNetworkLogs
+        pGuardDutyFindingPublishingFrequency: !Ref pGuardDutyFindingPublishingFrequency
       Tags:
         - Key: sra-solution
           Value: !Ref pSRAStagingS3KeyPrefix
