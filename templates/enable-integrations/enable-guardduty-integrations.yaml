@@ -32,6 +32,71 @@ Parameters:
     Default: sra-gd-s3-lambda
     Description: Lambda execution role for GuardDuty S3 Event Notification Configuration
     Type: String
+  pSRAAlarmEmail:
+    AllowedPattern: '^$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$'
+    ConstraintDescription: Must be a valid email address.
+    Default: ''
+    Description: (Optional) Email address for receiving SRA alarms
+    Type: String
+  pDisableGuardDuty:
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
+    Description: Disable the GuardDuty solution in all accounts and regions before deleting the stack.
+    Type: String
+  pAutoEnableS3Logs:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable S3 logs
+    Type: String
+  pAutoEnableKubernetesAuditLogs:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable Kubernetes Audit Logs
+    Type: String
+  pAutoEnableMalwareProtection:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable Malware Protection
+    Type: String
+  pEnableRdsLoginEvents:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable RDS Login Events
+    Type: String   
+  pEnableEksRuntimeMonitoring:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable EKS Runtime Monitoring
+    Type: String   
+  pEnableEksAddonManagement:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable EKS Add-on Management
+    Type: String
+  pEnableLambdaNetworkLogs:
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: Auto enable Lambda Network Logs
+    Type: String
+  pGuardDutyFindingPublishingFrequency:
+    AllowedValues: [FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS]
+    Default: FIFTEEN_MINUTES
+    Description: Finding publishing frequency
+    Type: String
+  pSRAAlarmEmail:
+    AllowedPattern: '^$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$'
+    ConstraintDescription: Must be a valid email address.
+    Default: ''
+    Description: (Optional) Email address for receiving SRA alarms
+    Type: String
+  pRepoURL:
+    Default: "https://github.com/aws-samples/aws-security-reference-architecture-examples.git"
+    Description: AWS Security Reference Architecture examples repository URL
+    Type: String
+  pRepoBranch:
+    Default: "tags/v3.0.4"
+    Description: SRA version to tag
+    Type: String
 
 Resources:
   GuardDutyStack:
@@ -39,12 +104,15 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/cfn-abi-amazon-guardduty/templates/sra-guardduty-enable-in-org-ssm.yaml
+      TemplateURL: !Sub >-
+        https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/aws-security-reference-architecture-examples/aws_sra_examples/modules/guardduty-org-module/templates/sra-guardduty-org-module-main.yaml
       Parameters:
-        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
-        pSraTestingFlag: 'false'
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
+        pSRAAlarmEmail: !Ref pSRAAlarmEmail
+        pDisableGuardDuty: !Ref pDisableGuardDuty
         pAutoEnableS3Logs: 'true'
-        pAutoEnableK8sLogs: 'false'
+        pAutoEnableKubernetesAuditLogs: 'false'
         pAutoEnableMalwareProtection: 'false'
       Tags:
         - Key: sra-solution

@@ -1,5 +1,24 @@
 [
   {
+    "Type" : "SSM_PARAMETER",
+    "Filter" : "/sra/gd/",
+    "Account" : "log_account"
+  },
+  {
+    "Type" : "SSM_PARAMETER",
+    "Filter" : "/sra/control-tower/",
+    "Account" : "log_account"
+  },
+  {
+    "Type" : "SSM_PARAMETER",
+    "Filter" : "/sra/regions/",
+    "Account" : "log_account"
+  },
+  {
+    "Type" : "SSM_PARAMETER",
+    "Filter" : "/sra/"
+  },
+  {
     "Type": "S3_BUCKET",
     "Filter": "sra-guardduty-org-delivery-",
     "Account": "log_account"
@@ -16,26 +35,7 @@
     "Type": "S3_BUCKET",
     "Filter": "tcat-"
   },
-  {
-    "Type": "SSM_PARAMETER",
-    "Filter": "/sra/gd/"
-  },
-  {
-    "Type": "STACK",
-    "Filter": "tCaT-enable-cloudtrail-ssm-"
-  },
-  {
-    "Type": "STACK",
-    "Filter": "tCaT-stage-ctrail-content-local-"
-  },
-  {
-    "Type": "STACK",
-    "Filter": "org-level-trail-dataevent-only"
-  },
-  {
-    "Type": "STACK",
-    "Filter": "org-level-trail-with-mgmt-events"
-  },
+
   {
     "Type": "S3_BUCKET",
     "Filter": "sra-cloudtrail-staging-"
@@ -46,12 +46,16 @@
     "Account": "log_account"
   },
   {
-    "Type": "S3_BUCKET",
-    "Filter": "cfn-abi-aws-cloudtrail-"
+    "Type" : "S3_BUCKET",
+    "Filter": "sra-helper-"
   },
   {
-    "Type": "SSM_PARAMETER",
-    "Filter": "/sra/ctrail/"
+    "Type" : "S3_BUCKET",
+    "Filter" : "sra-staging-"
+  },
+  {
+    "Type": "S3_BUCKET",
+    "Filter": "cfn-abi-aws-cloudtrail-"
   },
   {
     "Type": "LOG_GROUP",
@@ -66,5 +70,51 @@
     "Type": "LOG_GROUP",
     "Filter": "/aws/lambda/sra-gd-s3",
     "Account": "log_account"
+  },
+  {
+    "Type" : "LOG_GROUP",
+    "Filter" : "/sra/gd/",
+    "Account" : "log_account"
+  },
+  {
+    "Type" : "LOG_GROUP",
+    "Filter": "/aws/lambda/sra-codebuild-project-lambda"
+  },
+  {
+    "Type" : "LOG_GROUP",
+    "Filter": "/aws/lambda/sra-guardduty-codebuild-project-lambda"
+  },
+  {
+    "Type" : "CODE_BUILD",
+    "Filter": "sra-codebuild-project"
+  },
+  {
+    "Type" : "IAM_ROLE",
+    "Filter" : "sra-execution",
+    "Account" : "log_account"
+  },
+  {
+    "Type" : "IAM_ROLE",
+    "Filter" : "sra-execution"
+  },
+  {
+    "Type" : "IAM_ROLE",
+    "Filter" : "sra-execution",
+    "Account" : "audit"
+  },
+  {
+    "Type" : "STACK_SET",
+    "Filter" : "sra-stackset-execution-role"
+  },
+  {
+    "Type" : "STACK",
+    "Filter" : "sra-common-prerequisites-staging-s3-bucket"
+  },
+  {
+    "Type" : "STACK",
+    "Filter" : "tCaT-launch-qradar"
+  },
+  {
+    "Type" : "GUARDDUTY_DET"
   }
 ]

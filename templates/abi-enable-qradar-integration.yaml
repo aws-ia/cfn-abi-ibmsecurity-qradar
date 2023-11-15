@@ -20,6 +20,14 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: cfn-abi-ibmsecurity-qradar
+  pRepoURL:
+    Default: "https://github.com/aws-samples/aws-security-reference-architecture-examples.git"
+    Description: AWS Security Reference Architecture examples repository URL
+    Type: String
+  pRepoBranch:
+    Default: "tags/v3.0.4"
+    Description: SRA version to tag
+    Type: String
   pEnableGuardDuty:
     AllowedValues: ['true', 'false']
     Default: 'false'
@@ -29,6 +37,17 @@ Parameters:
     AllowedValues: ['true', 'false']
     Default: 'false'
     Description: Enable CloudTrail
+    Type: String
+  pDisableGuardDuty:
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
+    Description: Disable the GuardDuty solution in all accounts and regions before deleting the stack.
+    Type: String
+  pSRAAlarmEmail:
+    AllowedPattern: '^$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$'
+    ConstraintDescription: Must be a valid email address.
+    Default: ''
+    Description: (Optional) Email address for receiving SRA alarms
     Type: String
 
 Conditions:
@@ -47,12 +66,20 @@ Resources:
     Properties:
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-cloudtrail-integrations.yaml
       Parameters:
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
         pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
         pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
         pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
 
+  CloudTrailReadyWaitCondition:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Metadata:
+      CTReady: !If [cEnableCloudTrial, !Ref CloudTrailIntegrationStack, ""]
+
   GuardDutyIntegrationStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: CloudTrailReadyWaitCondition
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Condition: cEnableGuardDuty
@@ -62,6 +89,10 @@ Resources:
         pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
         pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
         pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
+        pSRAAlarmEmail: !Ref pSRAAlarmEmail
+        pDisableGuardDuty: !Ref pDisableGuardDuty
 
   SetupIAMRoleStack:
     Type: AWS::CloudFormation::StackSet

@@ -24,6 +24,7 @@ tests:
       pSRAStagingS3KeyPrefix: $[taskcat_project_name]
       pEnableCloudTrial: 'true'
       pEnableGuardDuty: 'true'
+      pDisableGuardDuty: 'Yes'
     regions:
       - us-east-1
     template: templates/abi-enable-qradar-integration.yaml

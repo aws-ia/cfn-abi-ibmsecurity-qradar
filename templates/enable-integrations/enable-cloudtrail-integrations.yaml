@@ -32,6 +32,14 @@ Parameters:
     Default: sra-ct-s3-lambda
     Description: Lambda execution role for CloudTrail S3 Event Notification Configuration
     Type: String
+  pRepoURL:
+    Default: "https://github.com/aws-samples/aws-security-reference-architecture-examples.git"
+    Description: AWS Security Reference Architecture examples repository URL
+    Type: String
+  pRepoBranch:
+    Default: "tags/v3.0.4"
+    Description: SRA version to tag
+    Type: String
 
 Resources:
   CloudTrailStack:
@@ -39,9 +47,11 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/cfn-abi-aws-cloudtrail/templates/sra-cloudtrail-enable-in-org-ssm.yaml
+      TemplateURL: !Sub >-
+        https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/aws-security-reference-architecture-examples/aws_sra_examples/modules/cloudtrail-org-module/templates/sra-cloudtrail-org-module-main.yaml
       Parameters:
-        pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
         pEnableDataEventsOnly: 'false'
         pEnableLambdaDataEvents: 'false'
         pEnableS3DataEvents: 'true'
