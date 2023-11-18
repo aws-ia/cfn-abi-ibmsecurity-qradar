@@ -356,12 +356,12 @@ def get_management_account_id():
     '''
     return ORG.describe_organization()['Organization']['MasterAccountId']
 
-def get_list_of_detectors():
+def get_list_of_detectors(gd_client):
     '''
     Get list of GuardDuty detectors
     '''
     detectors = []
-    paginator = GD.get_paginator('list_detectors')
+    paginator = gd_client.get_paginator('list_detectors')
     for page in paginator.paginate():
         detectors += page['DetectorIds']
     return detectors
@@ -385,11 +385,10 @@ def delete_detector():
             gd_client = boto3.client('guardduty')
 
         if gd_client:
-            detector_ids = get_list_of_detectors()
+            detector_ids = get_list_of_detectors(gd_client)
             for det_id in detector_ids:
                 print('Deleting GuardDuty Detector in %s', account['Id'])
                 gd_client.delete_detector(DetectorId=det_id)
-
 
 def list_cb_projects():
     '''
