@@ -1,25 +1,19 @@
-
 ---
-
 weight: 9
-
-title: PostDeployment Options
-
-description: Post deployment options
-
+title: Postdeployment options
+description: Postdeployment options
 ---
+# Postdeployment options
 
-  
+Configure QRadar Log Insights to ingest CloudTrail and GuardDuty data.
 
-# Configure QRadar Log Insights to ingest the CloudTrail and GuardDuty Data
-
-  
+**Note**: Configure other options, including Proxy Server, EPS Throttle, or other advanced options, as required for your environment.
 
 ## AWS CloudTrail
 
-Setup a new Ingestion Data Source with the following parameters:
+Set up a new ingestion data source with the following parameters:
 
-**On the Overview Tab:**
+**On the Overview tab:**
 | Parameter |Value  |
 |--|--|
 |Name|*\<User selected>* |
@@ -28,7 +22,7 @@ Setup a new Ingestion Data Source with the following parameters:
 |Data source identifier|*\<User selected>*|
 |Data Collector|*\<Choose the desired attached Data Collector>*
 
-**On the Connector Tab:**
+**On the Connector tab:**
 |Parameter|Value|
 |--|--|
 |Authentication Method|EC2 Instance IAM Role
@@ -40,14 +34,9 @@ Setup a new Ingestion Data Source with the following parameters:
 |S3 Collection Method|SQS Event Notifications|
 |Event Format|AWS CloudTrail JSON|
 
-Any options such as Proxy Server, EPS Throttle, or other Advanced options may be configured as required for your environment.
-
-
-  
-
 ## Amazon GuardDuty
 
-**On the Overview Tab:**
+**On the Overview tab:**
 | Parameter |Value  |
 |--|--|
 |Name|*\<User selected>* |
@@ -56,7 +45,7 @@ Any options such as Proxy Server, EPS Throttle, or other Advanced options may be
 |Data source identifier|*\<User selected>*|
 |Data Collector|*\<Choose the desired attached Data Collector>*
 
-**On the Connector Tab:**
+**On the Connector tab:**
 |Parameter|Value|
 |--|--|
 |Authentication Method|EC2 Instance IAM Role
@@ -68,7 +57,4 @@ Any options such as Proxy Server, EPS Throttle, or other Advanced options may be
 |S3 Collection Method|SQS Event Notifications|
 |Event Format|LINEBYLINE
 
-Any options such as Proxy Server, EPS Throttle, or other Advanced options may be configured as required for your environment.
-
-
-**Next:** Choose [Test the Deployment](/test-deployment/index.html) to get started.
+**Next**: [Test the deployment](/test-deployment/index.html)

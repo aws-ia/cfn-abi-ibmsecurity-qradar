@@ -1,13 +1,14 @@
 ---
 weight: 7
-title: PreDeployment Options
-description: Pre Deployment Options
+title: Predeployment options
+description: Predeployment options
 ---
+# Predeployment options
 
-Before deploying this ABI package, complete the following steps:
+Before deploying this AWS Built-in solution, complete the following steps:
 
-* Subscribe to IBM Security QRadar Log Insights SaaS (US) from AWS Marketplace using https://aws.amazon.com/marketplace/pp/prodview-p2llj6q6wlsq4
+1. Subscribe to IBM Security QRadar Log Insights SaaS (US) from [AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-p2llj6q6wlsq4).
 
-* Your AWS account setup must be using either AWS Control Tower or AWS Organizations
+2. Set up your AWS account using either AWS Control Tower or AWS Organizations.
 
-**Next:** Choose **[Deployment Steps](/deployment-steps/index.html)** to get started.
+**Next:**: [Deployment steps](/deployment-steps/index.html)
