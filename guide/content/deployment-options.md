@@ -3,7 +3,7 @@ weight: 6
 title: Deployment options
 description: Deployment options
 ---
-# Deployment options suupported by this AWS Built-in solution
+# Deployment options supported by this AWS Built-in solution
 
 Deployment options include:
 
