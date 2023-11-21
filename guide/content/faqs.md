@@ -3,7 +3,6 @@ weight: 100
 title: FAQs
 description: Frequently asked questions
 ---
-# FAQs
 
 ## Can I contribute to this repository? 
 

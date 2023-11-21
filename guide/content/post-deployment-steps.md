@@ -3,7 +3,6 @@ weight: 9
 title: Postdeployment options
 description: Postdeployment options
 ---
-# Postdeployment options
 
 Configure QRadar Log Insights to ingest CloudTrail and GuardDuty data.
 

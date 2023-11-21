@@ -3,7 +3,6 @@ weight: 4
 title: Cost and licenses
 description: Cost of the solution and licenses required.
 ---
-# Cost and licenses
 
 ## IBM Security QRadar Log Insights SaaS
 

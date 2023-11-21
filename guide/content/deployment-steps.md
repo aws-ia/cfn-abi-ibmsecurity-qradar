@@ -3,7 +3,6 @@ weight: 8
 title: Deployment steps
 description: Deployment steps
 ---
-# Deployment steps
 
 ## Launch the CloudFormation template in the AWS Organizations management account {#launch-cfn}
 
@@ -15,7 +14,7 @@ description: Deployment steps
 * **pEnableCloudTrial**: `true` (Enables CloudTrail at the organization level. Default is false.)
 * **pEnableGuardDuty**: `true` (Enables GuardDuty at the organization level. Default is false.)
 * **pSRAS3BucketRegion**: `us-east-1` (Do not change unless the `pSRASourceS3BucketName` parameter is changed to your own Amazon S3 bucket. In that case, match the region with AWS Region where the S3 bucket is created.)
-* **pSRASourceS3BucketName**: `aws-abi-pilot` (Leave the default value.)
+* **pSRASourceS3BucketName**: `aws-abi` (Leave the default value.)
 * **pSRAStagingS3KeyPrefix**: `cfn-abi-ibmsecurity-qradar` (Leave the default value.)
 
 3. Select the following **Capabilities** and choose **Submit** to launch the stack.
@@ -36,7 +35,7 @@ To deploy this sample partner integration page using CfCT solution, add the foll
 ```
 resources:
   - name: launch-qradar-main-abi
-    resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-ibmsecurity-qradar/templates/abi-enable-qradar-integration.yaml
+    resource_file: https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-ibmsecurity-qradar/templates/abi-enable-qradar-integration.yaml
     deploy_method: stack_set
     parameters:
       - parameter_key: pEnableCloudTrial
