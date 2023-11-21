@@ -1,7 +1,7 @@
 ---
 weight: 2
-title: Overview
-description:
+title: IBM Security QRadar Log Insights ABI Overview
+description: An overview of AWS Built-in Integration with IBM Security QRadar Log Insights
 ---
 
 This [AWS Built-in](https://aws.amazon.com/partners/built-in-partner-solutions/) solution deploys IBM QRadar Integrations for AWS Organizations on the AWS Cloud. It’s for QRadar Log Insights, QRadar On Cloud (QRoC), and QRadar SIEM customers that want to provide AWS CloudTrail and Amazon GuardDuty integrations across multiple AWS accounts.
