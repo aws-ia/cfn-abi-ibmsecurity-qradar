@@ -3,7 +3,6 @@ weight: 10
 title: Test the deployment
 description: Test the deployment
 ---
-# Test the deployment
 
 To verify successful ingestion data source configuration, do these steps:
 

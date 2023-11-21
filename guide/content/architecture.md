@@ -1,5 +1,8 @@
-
-# Architecture
+---
+weight: 5
+title: Architecture
+description: ABI Solution architecture
+---
 
 Deploying this AWS Built-in package builds the following architecture:
 

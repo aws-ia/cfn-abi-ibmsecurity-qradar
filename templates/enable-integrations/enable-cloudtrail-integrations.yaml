@@ -5,7 +5,7 @@ Parameters:
   pSRASourceS3BucketName:
     AllowedPattern: '^([\w.-]{1,900})$|^(\/[\w.-]{1,900})*[\w.-]{1,900}$'
     ConstraintDescription: Must be alphanumeric or special characters [., _, -]. In addition, the slash character ( / ) used to delineate hierarchies in parameter names.
-    Default: aws-abi-pilot
+    Default: aws-abi
     Description: Source bucket for all templates and artefacts that will get copied into staging bucket
     Type: String
   pSRAS3BucketRegion:

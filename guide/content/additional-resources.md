@@ -3,7 +3,6 @@ weight: 11
 title: Additional resources
 description: Additional resources
 ---
-# Additional resources
 
 * [IBM Security QRadar Log Insights](https://www.ibm.com/products/qradar-log-insights)
 * [AWS Security Reference Architecture (AWS SRA)](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html)

@@ -3,11 +3,11 @@ weight: 6
 title: Deployment options
 description: Deployment options
 ---
-# Deployment options
+# Deployment options supported by this AWS Built-in solution
 
 Deployment options include:
 
-* Launch the [CloudFormation template in the management account](/launch-using-cloudformation/index.html).
-* Launch using [Customizations for Control Tower (CfCT)](/launch-using-cfct/index.html).
+* Launch the [CloudFormation template in the AWS Management Console](/deployment-steps/index.html#launch-cfn).
+* Launch using [Customizations for AWS Control Tower (CfCT)](/deployment-steps/index.html#launch-cfct).
 
 **Next**: [Predeployment steps](/pre-deployment-steps/index.html)

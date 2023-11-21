@@ -3,7 +3,6 @@ weight: 7
 title: Predeployment options
 description: Predeployment options
 ---
-# Predeployment options
 
 Before deploying this AWS Built-in solution, complete the following steps:
 
