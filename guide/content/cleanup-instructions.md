@@ -4,8 +4,6 @@ title: Cleanup instructions
 description: Instructions to clean up the resources created by the AWS Built-in package
 ---
 
-# Cleanup instructions
-
 After trying this AWS Built-in solution, you may want to redeploy or remove it completely. In either case, this solution leaves certain resources as-is when you delete the stacks that are deployed. This behavior is working as designed to avoid deleting the history of data collections in your accounts.
 
 You can clean up resources created this AWS Built-in solution to avoid incurring charges for resources created and avoid conflicts while redeploying the stack.
