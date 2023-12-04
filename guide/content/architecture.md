@@ -1,35 +1,31 @@
+---
+weight: 5
+title: Architecture
+description: ABI Solution architecture
+---
 
-
-## Deploying this ABI package builds the following architecture:
+Deploying this AWS Built-in package builds the following architecture:
 
 ![Architecture diagram](/images/architecture.png)
 
-**In all existing and future AWS accounts in your AWS organization:**
+* In all existing and future AWS accounts in your AWS organization:
 
+    * If you choose CloudTrail when deploying the QRadar AWS Built-in template, all actions defined in the [AWS CloudTrail SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/cloudtrail/cloudtrail_org) are performed.
+    * If you choose GuardDuty when deploying the QRadar AWS Built-in template, all actions defined in the [Amazon GuardDuty SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/guardduty/guardduty_org) are performed.
 
-* If CloudTrail setup is chosen when deploying the QRadar ABI template, all actions defined in the  [AWS CloudTrail SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/cloudtrail/cloudtrail_org) will be performed
+* In the log archive account, if using CloudTrail, the following resources are created:
 
-* If GuardDuty setup is chosen when deploying the QRadar ABI template, all actions defined in the [Amazon GuardDuty SRA module](https://github.com/aws-samples/aws-security-reference-architecture-examples/tree/main/aws_sra_examples/solutions/guardduty/guardduty_org) will be performed
+    * An Amazon Simple Queue Service (Amazon SQS) queue to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's CloudTrail data.
+    * `ObjectCreated` notifications on the S3 bucket monitoring the path to the CloudTrail data for all accounts and regions and targeting the Amazon SQS queue.
 
-  
-**In the log archive account:**
+* If using GuardDuty, the following resources are created:
 
-*If CloudTrail setup is chosen, the following resources are created:
+    * An Amazon SQS queue to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's GuardDuty data.
+    * `ObjectCreated` notifications on the S3 bucket monitoring the path to the GuardDuty data for all accounts and regions and targeting the Amazon SQS queue.
 
-* An SQS Queue will be created to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's CloudTrail data
+**IAM role**
 
-* `ObjectCreated` notifications on the S3 bucket monitoring the path to the CloudTrail data for all accounts and regions and targeting the above SQS queue
-
-*If GuardDuty setup is chosen, the following resources are created:
-
-* An SQS Queue will be created to receive `ObjectCreated` notifications from the S3 bucket in the logging account containing the organization's GuardDuty data
-
-* `ObjectCreated` notifications on the S3 bucket monitoring the path to the GuardDuty data for all accounts and regions and targeting the above SQS queue
-
-
-**IAM Role**
-
-The following role will be created in the Logging Account to provide access to the SQS Queues created to track new data and to access the required data from S3 and any required KMS keys. The trust policy on this role will contain the "PrincipalARN" provided during the CloudFormation template execution.
+The following role is created in the logging account to provide access to the Amazon SQS queues created to track new data and access the required data from S3 and any required AWS Key Management Service (AWS KMS) keys. The trust policy on this role contains the `PrincipalARN` key provided during the CloudFormation template execution.
 
 Policy
 
@@ -58,7 +54,7 @@ Policy
     ]
     }
 
-Trust Relationship
+Trust relationship
 
     {
     "Version": "2012-10-17",
@@ -73,8 +69,5 @@ Trust Relationship
     ]
     }
 
-  
 
-  
-
-**Next:** Choose [Deployment Options](/deployment-options/index.html) to get started.
+**Next**: [Deployment options](/deployment-options/index.html)
