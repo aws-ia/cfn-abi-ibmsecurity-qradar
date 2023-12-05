@@ -18,30 +18,55 @@ This section provides instructions to clean up the resources created by the AWS 
 
 ## Delete resources created by the AWS Built-in solution
 
-In the management account:
+#### In the management account:
 
-1. Delete the following Amazon S3 buckets. See [Deleting a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) for more information.
+1. [Delete the following Amazon S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html).
 
-- cfn-abi-amazon-guardduty-`<account-id>`-`<region>`
-- cfn-abi-aws-cloudtrail-`<account-id>`-`<region>`
 - sra-gd-staging-`<account-id>`-`<region>`
 - sra-cloudtrail-staging-`<account-id>`-`<region>`
+- sra-helper-`<account-id>`-`<region>`
+- sra-staging-`<account-id>`-`<regions>` # Repeat for all regions where the solution is deployed.
 
-2. Delete the following AWS Systems Manager (SSM) parameters. See [Deleting a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) for more information.
+2. [Delete Systems Manager parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/deleting-parameters.html) that start with prefix `/sra/`. Repeat for all active regions.
 
-- All parameters with prefix `/sra/gd/`
-- All parameters with prefix `/sra/ctrail/`
+3. [Delete the AWS CloudWatch log groups](https://docs.aws.amazon.com/solutions/latest/research-service-workbench-on-aws/deleting-the-aws-cloudwatch-logs.html) that start with the following prefixes:
 
-3. Delete all CloudWatch log groups that start with `/sra/sra-org-trail` prefixes. See [Deleting the AWS CloudWatch logs](https://docs.aws.amazon.com/solutions/latest/research-service-workbench-on-aws/deleting-the-aws-cloudwatch-logs.html) for more information.
+- `/sra/sra-org-trail`
+- `/aws/lambda/sra-codebuild-project-lambda`
+- `/aws/lambda/sra-guardduty-codebuild-project-lambda`
 
-In the log archive account:
+4. [Delete a build project in AWS CodeBuild](https://docs.aws.amazon.com/codebuild/latest/userguide/delete-project.html) that start with the following prefixes.
 
-1. Delete the following Amazon S3 buckets. See [Deleting a bucket](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html) for more information.
+- `sra-codebuild-project`
 
-- sra-guardduty-org-delivery-<account-id>-<region>
-- sra-org-trail-logs-<account-id>-<region>
+5. [Delete AWS IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_manage_delete.html) that are listed below.
 
-2. Delete the CloudWatch log groups that start with the following prefixes. See [Deleting the AWS CloudWatch logs](https://docs.aws.amazon.com/solutions/latest/research-service-workbench-on-aws/deleting-the-aws-cloudwatch-logs.html) for more information.
+- `sra-execution`
+
+6. [Delete a stack set](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-delete.html) with name `sra-stackset-execution-role`.
+
+7. [Delete a stack](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html) with stack name `sra-common-prerequisites-staging-s3-bucket`.
+
+#### In the log archive account:
+
+1. [Delete the following Amazon S3 buckets](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-bucket.html).
+
+- sra-guardduty-org-delivery-`<account-id>`-`<region>`
+- sra-org-trail-logs-`<account-id>`-`<region>`
+
+2. [Delete Systems Manager parameters](https://docs.aws.amazon.com/systems-manager/latest/userguide/deleting-parameters.html) that start with prefix `/sra/`. Repeat for all active regions.
+
+3. [Delete the AWS CloudWatch log groups](https://docs.aws.amazon.com/solutions/latest/research-service-workbench-on-aws/deleting-the-aws-cloudwatch-logs.html) that start with the following prefixes:
 
 - `/aws/lambda/sra-ct-s3`
 - `/aws/lambda/sra-gd-s3`
+- `/sra/gd/`
+
+4. [Delete AWS IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_manage_delete.html) that are listed below.
+
+- `sra-execution`
+
+#### In the audit account:
+
+1. [Delete AWS IAM roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_manage_delete.html) that are listed below.
+- `sra-execution`
