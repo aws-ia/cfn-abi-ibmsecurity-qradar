@@ -28,12 +28,12 @@ Parameters:
     Default: "tags/v3.0.4"
     Description: SRA version to tag
     Type: String
-  pEnableGuardDuty:
+  pConfigureGuardDuty:
     AllowedValues: ['true', 'false']
     Default: 'false'
     Description: Enable GuardDuty at Organization level
     Type: String
-  pEnableCloudTrail:
+  pConfigureCloudTrail:
     AllowedValues: ['true', 'false']
     Default: 'false'
     Description: Enable CloudTrail
@@ -51,11 +51,11 @@ Parameters:
     Type: String
 
 Conditions:
-  cEnableGuardDuty: !Equals [!Ref pEnableGuardDuty, 'true']
-  cEnableCloudTrail: !Equals [!Ref pEnableCloudTrail, 'true']
+  cEnableGuardDuty: !Equals [!Ref pConfigureGuardDuty, 'Yes']
+  cEnableCloudTrail: !Equals [!Ref pConfigureCloudTrail, 'Yes']
   cEnableSetupIAMRoleStack: !Or
-    - !Equals [!Ref pEnableGuardDuty, 'true']
-    - !Equals [!Ref pEnableCloudTrail, 'true']
+    - !Equals [!Ref pConfigureGuardDuty, 'Yes']
+    - !Equals [!Ref pConfigureCloudTrail, 'Yes']
 
 Resources:
   CloudTrailIntegrationStack:

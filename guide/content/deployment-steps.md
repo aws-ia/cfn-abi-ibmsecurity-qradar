@@ -11,9 +11,9 @@ description: Deployment steps
 
 * **Stack name**: `ibmsecurity-qradar-abi-integrations`
 * **PrincipalArn**: `arn:aws:iam::123456789012:root` (Amazon Resource Name of the principal that can assume the role.
-* **pEnableCloudTrial**: `true` (Enables CloudTrail at the organization level. Default is false.)
-* **pEnableGuardDuty**: `true` (Enables GuardDuty at the organization level. Default is false.)
-* **pDisableGuardDuty**: `Yes` (Disable the GuardDuty solution in all accounts and regions before deleting the stack. Default is false.)
+* **pConfigureCloudTrail**: `Yes` (Enables CloudTrail at the organization level. Default is `No`.)
+* **pConfigureGuardDuty**: `Yes` (Enables GuardDuty at the organization level. Default is `No`.)
+* **pDisableGuardDuty**: `Yes` (Disable the GuardDuty solution in all accounts and regions before deleting the stack. Default is `No`.)
 * **pSRAS3BucketRegion**: `us-east-1` (Do not change unless the `pSRASourceS3BucketName` parameter is changed to your own Amazon S3 bucket. In that case, match the region with AWS Region where the S3 bucket is created.)
 * **pSRASourceS3BucketName**: `aws-abi` (Leave the default value.)
 * **pSRAStagingS3KeyPrefix**: `cfn-abi-ibmsecurity-qradar` (Leave the default value.)
@@ -40,10 +40,10 @@ resources:
     resource_file: https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-ibmsecurity-qradar/templates/abi-enable-qradar-integration.yaml
     deploy_method: stack_set
     parameters:
-      - parameter_key: pEnableCloudTrial
-        parameter_value: 'false'  # Set to 'true' to enable CloudTrail integration
-      - parameter_key: pEnableGuardDuty
-        parameter_value: 'false'  # Set to 'true' to enable GuardDuty integration
+      - parameter_key: pConfigureCloudTrail
+        parameter_value: 'No'  # Set to 'Yes' to enable CloudTrail integration
+      - parameter_key: pConfigureGuardDuty
+        parameter_value: 'No'  # Set to 'Yes' to enable GuardDuty integration
       - parameter_key: pDisableGuardDuty
         parameter_value: 'Yes'  # Set to 'No' to leave GuardDuty solution in all accounts and regions before deleting the stack.
       - parameter_key: pSRASourceS3BucketName
