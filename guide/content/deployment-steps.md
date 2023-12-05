@@ -23,6 +23,9 @@ Enable CloudTrail at the Organization level
 * **pEnableGuardDuty**: `true` (Default: false)
 Enable GuardDuty at the Organization level
 
+* **pDisableGuardDuty**: `Yes` (Default: No)
+Disable the GuardDuty solution in all accounts and regions before deleting the stack.
+
 * **pSRAS3BucketRegion**: `us-east-1` (Default : Do not change unless pSRASourceS3BucketName is changed to your own S3 bucket. In that case, match the region with AWS region where the S3 bucket is created)
 
 * **pSRASourceS3BucketName**: `aws-abi-pilot` (Default : should not require changing)
@@ -88,6 +91,8 @@ resources:
         parameter_value: 'false'  # Set to 'true' to enable CloudTrail integration
       - parameter_key: pEnableGuardDuty
         parameter_value: 'false'  # Set to 'true' to enable GuardDuty integration
+      - parameter_key: pEnableGuardDuty
+        parameter_value: 'Yes'  # Set to 'No' to leave GuardDuty solution in all accounts and regions before deleting the stack.
       - parameter_key: pSRASourceS3BucketName
         parameter_value: aws-abi
       - parameter_key: pSRAS3BucketRegion
