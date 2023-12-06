@@ -4,6 +4,6 @@ title: Troubleshooting
 description: Troubleshooting
 ---
 
-For troubleshooting common AWS Built-in issues, refer to the [AWS Built-in Reference Guide](https://aws-abi.s3.amazonaws.com/guide/cfn-abi-aws-reference-guide/overview/index.html) and [Troubleshooting CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html).
+For troubleshooting common AWS Built-in issues, refer to the [AWS Built-in Reference Guide](https://a.co/j72wxaw) and [Troubleshooting CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html).
 
 **Next**: [Feedback](/feedback/index.html)

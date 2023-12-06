@@ -20,39 +20,66 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
     Default: cfn-abi-ibmsecurity-qradar
-  pEnableGuardDuty:
-    AllowedValues: ['true', 'false']
-    Default: 'false'
+  pRepoURL:
+    Default: "https://github.com/aws-samples/aws-security-reference-architecture-examples.git"
+    Description: AWS Security Reference Architecture examples repository URL
+    Type: String
+  pRepoBranch:
+    Default: "tags/v3.0.4"
+    Description: SRA version to tag
+    Type: String
+  pConfigureGuardDuty:
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
     Description: Enable GuardDuty at Organization level
     Type: String
-  pEnableCloudTrial:
-    AllowedValues: ['true', 'false']
-    Default: 'false'
+  pConfigureCloudTrail:
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
     Description: Enable CloudTrail
+    Type: String
+  pDisableGuardDuty:
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
+    Description: Disable the GuardDuty solution in all accounts and regions before deleting the stack.
+    Type: String
+  pSRAAlarmEmail:
+    AllowedPattern: '^$|^([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)$'
+    ConstraintDescription: Must be a valid email address.
+    Default: ''
+    Description: (Optional) Email address for receiving SRA alarms
     Type: String
 
 Conditions:
-  cEnableGuardDuty: !Equals [!Ref pEnableGuardDuty, 'true']
-  cEnableCloudTrial: !Equals [!Ref pEnableCloudTrial, 'true']
+  cEnableGuardDuty: !Equals [!Ref pConfigureGuardDuty, 'Yes']
+  cEnableCloudTrail: !Equals [!Ref pConfigureCloudTrail, 'Yes']
   cEnableSetupIAMRoleStack: !Or
-    - !Equals [!Ref pEnableGuardDuty, 'true']
-    - !Equals [!Ref pEnableCloudTrial, 'true']
+    - !Equals [!Ref pConfigureGuardDuty, 'Yes']
+    - !Equals [!Ref pConfigureCloudTrail, 'Yes']
 
 Resources:
   CloudTrailIntegrationStack:
     Type: AWS::CloudFormation::Stack
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
-    Condition: cEnableCloudTrial
+    Condition: cEnableCloudTrail
     Properties:
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/templates/enable-integrations/enable-cloudtrail-integrations.yaml
       Parameters:
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
         pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
         pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
         pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
 
+  CloudTrailReadyWaitCondition:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Metadata:
+      CTReady: !If [cEnableCloudTrail, !Ref CloudTrailIntegrationStack, ""]
+
   GuardDutyIntegrationStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: CloudTrailReadyWaitCondition
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Condition: cEnableGuardDuty
@@ -62,6 +89,10 @@ Resources:
         pSRASourceS3BucketName: !Ref pSRASourceS3BucketName
         pSRAStagingS3KeyPrefix: !Ref pSRAStagingS3KeyPrefix
         pSRAS3BucketRegion: !Ref pSRAS3BucketRegion
+        pRepoURL: !Ref pRepoURL
+        pRepoBranch: !Ref pRepoBranch
+        pSRAAlarmEmail: !Ref pSRAAlarmEmail
+        pDisableGuardDuty: !Ref pDisableGuardDuty
 
   SetupIAMRoleStack:
     Type: AWS::CloudFormation::StackSet
@@ -85,7 +116,7 @@ Resources:
         - DeploymentTargets:
             Accounts:
               - !If
-                - cEnableCloudTrial
+                - cEnableCloudTrail
                 - !GetAtt CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId
                 - !If
                   - cEnableGuardDuty
@@ -100,21 +131,21 @@ Resources:
         - ParameterKey: LogArchiveAccountId
           ParameterValue:
             !If [
-              cEnableCloudTrial,
+              cEnableCloudTrail,
               !GetAtt CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId,
               !GetAtt GuardDutyIntegrationStack.Outputs.oLogArchiveAccountId,
             ]
         - ParameterKey: AuditAccountId
           ParameterValue:
             !If [
-              cEnableCloudTrial,
+              cEnableCloudTrail,
               !GetAtt CloudTrailIntegrationStack.Outputs.oAuditAccountId,
               !GetAtt GuardDutyIntegrationStack.Outputs.oAuditAccountId,
             ]
         - ParameterKey: CloudTrailSQSArn
           ParameterValue:
             !If [
-              cEnableCloudTrial,
+              cEnableCloudTrail,
               !GetAtt CloudTrailIntegrationStack.Outputs.oCloudTrailSQSQueueArn,
               '',
             ]
@@ -128,7 +159,7 @@ Resources:
         - ParameterKey: CloudTrailBucket
           ParameterValue:
             !If [
-              cEnableCloudTrial,
+              cEnableCloudTrail,
               !GetAtt CloudTrailIntegrationStack.Outputs.oOrganizationCloudTrailS3BucketArn,
               '',
             ]
@@ -148,7 +179,7 @@ Outputs:
   QRadarCloudTrailSQSQueueUrl:
     Description: SQS URL for the CloudTrail events
     Value: !GetAtt [CloudTrailIntegrationStack, Outputs.oCloudTrailSQSQueueURL]
-    Condition: cEnableCloudTrial
+    Condition: cEnableCloudTrail
   QRadarGuardDutyFindingsSQSQueueUrl:
     Description: SQS URL for the GuardDuty findings
     Value: !GetAtt [GuardDutyIntegrationStack, Outputs.oGuardDutySQSQueueURL]
@@ -161,7 +192,7 @@ Outputs:
     Condition: cEnableSetupIAMRoleStack
     Value:
       !If [
-        cEnableCloudTrial,
+        cEnableCloudTrail,
         !Sub 'arn:aws:iam::${CloudTrailIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole',
         !Sub 'arn:aws:iam::${GuardDutyIntegrationStack.Outputs.oLogArchiveAccountId}:role/QRadarRole',
       ]

@@ -1,0 +1,75 @@
+[
+    {
+        "Type" : "SSM_PARAMETER",
+        "Filter" : "/sra/gd/",
+        "Account" : "log_account"
+    },
+    {
+        "Type" : "SSM_PARAMETER",
+        "Filter" : "/sra/control-tower/",
+        "Account" : "log_account"
+    },
+    {
+        "Type" : "SSM_PARAMETER",
+        "Filter" : "/sra/regions/",
+        "Account" : "log_account"
+    },
+    {
+        "Type" : "SSM_PARAMETER",
+        "Filter" : "/sra/"
+    },
+    {
+        "Type" : "S3_BUCKET",
+        "Filter": "sra-helper-"
+    },
+    {
+        "Type" : "S3_BUCKET",
+        "Filter" : "sra-staging-"
+    },
+    {
+        "Type" : "LOG_GROUP",
+        "Filter": "/aws/lambda/sra-codebuild-project-lambda"
+    },
+    {
+        "Type" : "LOG_GROUP",
+        "Filter": "/aws/lambda/sra-guardduty-codebuild-project-lambda"
+    },
+    {
+        "Type" : "LOG_GROUP",
+        "Filter" : "/sra/gd/",
+        "Account" : "log_account"
+    },
+    {
+        "Type" : "CODE_BUILD",
+        "Filter": "sra-codebuild-project"
+    },
+    {
+        "Type" : "IAM_ROLE",
+        "Filter" : "sra-execution",
+        "Account" : "log_account"
+    },
+    {
+        "Type" : "IAM_ROLE",
+        "Filter" : "sra-execution"
+    },
+    {
+        "Type" : "IAM_ROLE",
+        "Filter" : "sra-execution",
+        "Account" : "audit"
+    },
+    {
+        "Type" : "STACK_SET",
+        "Filter" : "sra-stackset-execution-role"
+    },
+    {
+        "Type" : "STACK",
+        "Filter" : "sra-common-prerequisites-staging-s3-bucket"
+    },
+    {
+        "Type" : "STACK",
+        "Filter" : "tCaT-logging-top-level-"
+    },
+    {
+        "Type" : "GUARDDUTY_DET"
+    }
+]

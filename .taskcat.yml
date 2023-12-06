@@ -22,8 +22,9 @@ tests:
       pSRASourceS3BucketName: $[taskcat_autobucket]
       pSRAS3BucketRegion: $[taskcat_current_region]
       pSRAStagingS3KeyPrefix: $[taskcat_project_name]
-      pEnableCloudTrial: 'true'
-      pEnableGuardDuty: 'true'
+      pConfigureCloudTrail: 'Yes'
+      pConfigureGuardDuty: 'Yes'
+      pDisableGuardDuty: 'Yes'
     regions:
       - us-east-1
     template: templates/abi-enable-qradar-integration.yaml
@@ -33,7 +34,7 @@ tests:
   #     pSRASourceS3BucketName: $[taskcat_autobucket]
   #     pSRAS3BucketRegion: $[taskcat_current_region]
   #     pSRAStagingS3KeyPrefix: $[taskcat_project_name]
-  #     pEnableCloudTrial: 'true'
+  #     pConfigureCloudTrail: 'Yes'
   #   regions:
   #     - us-east-1
   #   template: templates/abi-enable-qradar-integration.yaml
@@ -43,7 +44,7 @@ tests:
   #     pSRASourceS3BucketName: $[taskcat_autobucket]
   #     pSRAS3BucketRegion: $[taskcat_current_region]
   #     pSRAStagingS3KeyPrefix: $[taskcat_project_name]
-  #     pEnableGuardDuty: 'true'
+  #     pConfigureGuardDuty: 'Yes'
   #   regions:
   #     - us-east-1
   #   template: templates/abi-enable-qradar-integration.yaml
