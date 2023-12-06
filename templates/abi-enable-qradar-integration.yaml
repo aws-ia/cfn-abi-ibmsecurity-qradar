@@ -29,13 +29,13 @@ Parameters:
     Description: SRA version to tag
     Type: String
   pConfigureGuardDuty:
-    AllowedValues: ['true', 'false']
-    Default: 'false'
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
     Description: Enable GuardDuty at Organization level
     Type: String
   pConfigureCloudTrail:
-    AllowedValues: ['true', 'false']
-    Default: 'false'
+    AllowedValues: ['Yes', 'No']
+    Default: 'No'
     Description: Enable CloudTrail
     Type: String
   pDisableGuardDuty:
