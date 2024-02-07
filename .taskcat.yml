@@ -29,6 +29,24 @@ tests:
       - us-east-1
     template: templates/abi-enable-qradar-integration.yaml
 
+  launch-qradar-main-both-nonct:
+    parameters:
+      pSRASourceS3BucketName: $[taskcat_autobucket]
+      pSRAS3BucketRegion: $[taskcat_current_region]
+      pSRAStagingS3KeyPrefix: $[taskcat_project_name]
+      pConfigureCloudTrail: 'Yes'
+      pConfigureGuardDuty: 'Yes'
+      pDisableGuardDuty: 'Yes'
+      pControlTower: 'false'
+      pLogArchiveAccountId: $[taskcat_ssm_/nonct/log-archive-account-id]
+      pSecurityAccountId: $[taskcat_ssm_/nonct/audit-account-id]
+      pGovernedRegions: 'us-east-1,us-east-2'
+      pAdminRoleName: 'AWSCloudFormationStackSetAdministrationRole'
+      pExecRoleName: 'AWSCloudFormationStackSetExecutionRole'
+    regions:
+      - us-east-1
+    template: templates/abi-enable-qradar-integration.yaml
+
   # launch-qradar-main-only-ct:
   #   parameters:
   #     pSRASourceS3BucketName: $[taskcat_autobucket]
