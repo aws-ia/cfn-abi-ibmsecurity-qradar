@@ -3,7 +3,7 @@ weight: 11
 title: Additional resources
 description: Additional resources
 ---
-
+* [IBM Security QRadar SIEM (Cloud-Native SaaS)]( https://www.ibm.com/products/qradar-cloud-native-siem)
 * [IBM Security QRadar Log Insights](https://www.ibm.com/products/qradar-log-insights)
 * [AWS Security Reference Architecture (AWS SRA)](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html)
 * [Code repository for AWS SRA examples](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/code-repo.html)
