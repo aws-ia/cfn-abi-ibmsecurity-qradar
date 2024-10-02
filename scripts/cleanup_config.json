@@ -4,6 +4,18 @@
     "Filter" : "tCaT-launch-qradar"
   },
   {
+    "Type" : "STACK_SET",
+    "Filter" : "qradar-setup-iam-role-stack"
+  },
+  {
+    "Type" : "STACK_SET",
+    "Filter" : "qradar-cloudtrail-event-stack"
+  },
+  {
+    "Type" : "STACK_SET",
+    "Filter" : "qradar-guardduty-event-stack"
+  },
+  {
     "Type" : "SSM_PARAMETER",
     "Filter" : "/sra/gd/",
     "Account" : "log_account"
@@ -39,7 +51,6 @@
     "Type": "S3_BUCKET",
     "Filter": "tcat-"
   },
-
   {
     "Type": "S3_BUCKET",
     "Filter": "sra-cloudtrail-staging-"
@@ -91,6 +102,9 @@
   {
     "Type" : "CODE_BUILD",
     "Filter": "sra-codebuild-project"
+  },
+  {
+    "Type" : "GUARDDUTY_DET"
   },
   {
     "Type" : "STACK_SET",
