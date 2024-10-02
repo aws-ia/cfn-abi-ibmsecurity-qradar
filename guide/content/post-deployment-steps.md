@@ -4,7 +4,7 @@ title: Postdeployment options
 description: Postdeployment options
 ---
 
-Configure QRadar Log Insights to ingest CloudTrail and GuardDuty data.
+Configure IBM Security QRadar to ingest CloudTrail and GuardDuty data.
 
 **Note**: Configure other options, including Proxy Server, EPS Throttle, or other advanced options, as required for your environment.
 
