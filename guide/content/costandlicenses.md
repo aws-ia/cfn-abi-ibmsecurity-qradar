@@ -4,9 +4,11 @@ title: Cost and licenses
 description: Cost of the solution and licenses required.
 ---
 
-## IBM Security QRadar Log Insights SaaS
+## IBM Security QRadar
 
-See [IBM Security QRadar Log Insights SaaS (US)](https://aws.amazon.com/marketplace/pp/prodview-p2llj6q6wlsq4) pricing.
+See [IBM Security QRadar SIEM (Cloud-Native SaaS)](https://aws.amazon.com/marketplace/pp/prodview-yjqjuhcxzub7s) pricing.
+
+See [IBM Security QRadar Log Insights SaaS](https://aws.amazon.com/marketplace/pp/prodview-p2llj6q6wlsq4) pricing.
 
 ## CloudTrail
 
