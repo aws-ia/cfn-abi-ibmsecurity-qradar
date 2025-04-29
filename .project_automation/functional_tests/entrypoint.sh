@@ -43,6 +43,7 @@ run_test "launch-qradar-main-default"
 
 run_test "launch-qradar-main-both"
 
+#run_test "launch-qradar-main-both-nonct"
 ## Executing ash tool
 
 #find ${PROJECT_PATH} -name lambda.zip -exec rm -rf {} \;
